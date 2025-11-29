@@ -38,7 +38,16 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      [
+        "expo-custom-assets",
+        {
+          "assetsPaths": [
+            "./assets/onboarding/"
+          ]
+        }
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -15,6 +15,7 @@ import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
@@ -22,11 +23,11 @@ export default function Onboarding() {
   const router = useRouter();
   const flatListRef = useRef<FlatList<any>>(null);
   const [index, setIndex] = useState(0);
-
+  const insets = useSafeAreaInsets();
   const scheme = useColorScheme();
 
   const OnboardingData = useMemo(
-    () => GetOnboardingData(scheme !== "dark"),
+    () => GetOnboardingData(scheme === "dark"),
     [scheme]
   );
   const scrollX = useSharedValue(0);
@@ -45,7 +46,7 @@ export default function Onboarding() {
   });
 
   const finish = () => {
-    router.replace("/(tabs)/explore");
+    router.replace("/main");
   };
 
   const next = () => {
@@ -57,7 +58,9 @@ export default function Onboarding() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View
+      style={{ flex: 1, marginTop: insets.top, marginBottom: insets.bottom }}
+    >
       <Animated.FlatList
         data={OnboardingData}
         ref={flatListRef}

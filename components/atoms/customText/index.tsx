@@ -1,5 +1,12 @@
+import { Colors } from "@/constants/Colors";
 import React from "react";
-import { Text as RNText, StyleProp, TextProps, TextStyle } from "react-native";
+import {
+  Text as RNText,
+  StyleProp,
+  TextProps,
+  TextStyle,
+  useColorScheme,
+} from "react-native";
 
 interface CustomTextProps extends TextProps {
   size?: number; // Font size
@@ -9,11 +16,18 @@ interface CustomTextProps extends TextProps {
 
 export const CustomText: React.FC<CustomTextProps> = ({
   size = 16, // default font size
-  color = "#333", // default font color
+  color, // default font color
   style,
   children,
   ...props
 }) => {
+  const colorScheme = useColorScheme();
+
+  const defaultColor = Colors[colorScheme || "dark"].text;
+  if (!color) {
+    color = defaultColor;
+  }
+
   return (
     <RNText
       {...props}

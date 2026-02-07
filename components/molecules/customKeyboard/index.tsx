@@ -25,10 +25,16 @@ type OnScreenKeyboardProps = {
 export const ENTER = "ENTER";
 export const BACKSPACE = "BACKSPACE";
 
+// const keys = [
+//   ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+//   ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
+//   [ENTER, "z", "x", "c", "v", "b", "n", "m", BACKSPACE],
+// ];
+
 const keys = [
   ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
   ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
-  [ENTER, "z", "x", "c", "v", "b", "n", "m", BACKSPACE],
+  ["z", "x", "c", "v", "b", "n", "m", BACKSPACE],
 ];
 
 // Cartoonish color palette
@@ -99,7 +105,7 @@ const KeyButton = memo(function KeyButton({
       style={[
         styles.key,
         {
-          width: isSpecial ? keyWidth * 1.5 : keyWidth,
+          width: isSpecial ? keyWidth * 2.5 : keyWidth,
           height: keyHeight,
           backgroundColor: bgColor,
         },
@@ -116,7 +122,7 @@ const KeyButton = memo(function KeyButton({
         {keyItem === ENTER ? (
           "ENTER"
         ) : keyItem === BACKSPACE ? (
-          <Ionicons name="backspace-outline" size={24} color={textColor} />
+          <Ionicons name="backspace-outline" size={28} color={textColor} />
         ) : (
           keyItem.toUpperCase()
         )}

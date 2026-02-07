@@ -4,7 +4,7 @@ import CustomKeyboard from "@/components/molecules/customKeyboard";
 import { wordDatabase } from "@/data/newWordDataWithHints";
 import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
 
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 type CellState = "green" | "yellow" | "gray" | "empty";
@@ -30,7 +30,7 @@ const GameScreen = () => {
 
     const selectedWords = Array.from(
       { length: rowCount },
-      () => wordDatabase[Math.floor(Math.random() * wordDatabase.length)]
+      () => wordDatabase[Math.floor(Math.random() * wordDatabase.length)],
     );
 
     return selectedWords;
@@ -42,12 +42,12 @@ const GameScreen = () => {
 
     setWords(selectedWords);
     setRows(
-      selectedWords.map((w) => Array.from({ length: w.word.length }, () => ""))
+      selectedWords.map((w) => Array.from({ length: w.word.length }, () => "")),
     );
     setLetterStates(
       selectedWords.map((w) =>
-        Array.from({ length: w.word.length }, () => "empty")
-      )
+        Array.from({ length: w.word.length }, () => "empty"),
+      ),
     );
     setEvaluatedRows(selectedWords.map(() => false));
   }, []);
@@ -140,6 +140,16 @@ const GameScreen = () => {
     };
   }, [letterStates, rows, evaluatedRows, curRow]);
 
+  useEffect(() => {
+    const currentWord = rows[curRow]?.join("");
+    const targetWord = words[curRow]?.word;
+    if (currentWord?.length < 1 && targetWord?.length < 1) return;
+    if (targetWord === undefined || currentWord === undefined) return;
+    if (currentWord?.length < targetWord?.length) return;
+    if (currentWord?.length === targetWord?.length) {
+      checkWord();
+    }
+  }, [curCol]);
   if (!rows.length) return null;
 
   return (

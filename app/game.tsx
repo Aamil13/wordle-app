@@ -3,6 +3,7 @@ import { GameCell } from "@/components/atoms/gameCell";
 import CustomKeyboard from "@/components/molecules/customKeyboard";
 import { wordDatabase } from "@/data/newWordDataWithHints";
 import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
+import { useRouter } from "expo-router";
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -10,14 +11,14 @@ import { StyleSheet, View } from "react-native";
 type CellState = "green" | "yellow" | "gray" | "empty";
 
 const GameScreen = () => {
+  const navigate = useRouter();
+  const [failCount, setFailCount] = useState(3);
   const [rows, setRows] = useState<string[][]>([]);
   const [letterStates, setLetterStates] = useState<CellState[][]>([]);
   const [evaluatedRows, setEvaluatedRows] = useState<boolean[]>([]);
   const [words, setWords] = useState<{ word: string; hint: string }[]>([]);
-
   const [curRow, setCurRow] = useState(0);
   const [curCol, _setCurCol] = useState(0);
-
   const colRef = useRef(curCol);
   const setCurCol = (val: number) => {
     colRef.current = val;
@@ -109,6 +110,17 @@ const GameScreen = () => {
       setCurRow((prev) => prev + 1);
       setCurCol(0);
     }
+    if (currentWord !== targetWord) {
+      setFailCount((prev) => prev - 1);
+    }
+
+    // check if on last row and is complete
+    if (rows?.length - 1 == curRow && currentWord === targetWord) {
+      console.log("Complete");
+      navigate.navigate("/game-over?win=true");
+    } else {
+      console.log("not -Complete");
+    }
   };
 
   // 🎹 Keyboard colors (only for current row)
@@ -150,6 +162,13 @@ const GameScreen = () => {
       checkWord();
     }
   }, [curCol]);
+
+  useEffect(() => {
+    if (failCount === 0) {
+      navigate.navigate("/game-over?win=false");
+    }
+  }, [failCount]);
+
   if (!rows.length) return null;
 
   return (

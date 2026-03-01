@@ -1,12 +1,15 @@
 import { CustomButton } from "@/components/atoms/Button";
 import { CustomText } from "@/components/atoms/customText";
 import AboutBottomSheet from "@/components/organisms/aboutBottomSheet";
+import { wordDatabase } from "@/data/newWordDataWithHints";
+import { getTotalWordCount, saveWordsToDatabase } from "@/localDb/pushToSqlLite";
+import { setOnboarding } from "@/storage/onboardStorage";
 import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
 import { SignedIn, SignedOut, useAuth, useClerk } from "@clerk/clerk-expo";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Link, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 
 const Main = () => {
@@ -15,6 +18,16 @@ const Main = () => {
   const { isLoaded } = useAuth();
   const router = useRouter();
 
+
+useEffect(() => {
+  const completeOnboarding = async () => {
+    await setOnboarding("true");
+  };
+  
+  completeOnboarding();
+}, []);
+
+  
   if (!isLoaded) {
     return null;
   }
@@ -36,6 +49,16 @@ const Main = () => {
     }
   };
 
+  const getTotalWords=()=>{
+   console.log(
+    getTotalWordCount()
+  )
+  }
+
+    const savewords=()=>{
+   saveWordsToDatabase(wordDatabase)
+  }
+
   return (
     <>
       <SafeAreaWrapper>
@@ -52,6 +75,18 @@ const Main = () => {
             </CustomText>
           </View>
           <View style={styles.buttonContainer}>
+            <CustomButton
+              text={"total"}
+              onPress={() => getTotalWords()}
+              initialRotation={-10}
+              variant="primary"
+            />
+             <CustomButton
+              text={"save"}
+              onPress={() => savewords()}
+              initialRotation={-10}
+              variant="primary"
+            />
             <CustomButton
               text={"Play"}
               onPress={() => router.push("/game")}

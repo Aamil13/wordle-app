@@ -1,3 +1,4 @@
+import { useAppStore } from "@/store";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React, { memo, useMemo } from "react";
 import {
@@ -5,7 +6,6 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -20,6 +20,7 @@ type OnScreenKeyboardProps = {
   greenLetters: string[];
   yellowLetters: string[];
   grayLetters: string[];
+  backSpaceDanger: boolean;
 };
 
 export const ENTER = "ENTER";
@@ -136,9 +137,10 @@ const OnScreenKeyboard = ({
   greenLetters,
   yellowLetters,
   grayLetters,
+  backSpaceDanger,
 }: OnScreenKeyboardProps) => {
   const { width } = useWindowDimensions();
-  const colorScheme = useColorScheme();
+  const colorScheme = useAppStore((state) => state.theme);
   const isDark = colorScheme === "dark";
   const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
 
@@ -184,8 +186,16 @@ const OnScreenKeyboard = ({
               keyWidth={keyWidth}
               keyHeight={keyHeight}
               isSpecial={isSpecialKey(key)}
-              bgColor={keyColors[key].bg}
-              textColor={keyColors[key].text}
+              bgColor={
+                backSpaceDanger && key === "BACKSPACE"
+                  ? "red"
+                  : keyColors[key].bg
+              }
+              textColor={
+                backSpaceDanger && key === "BACKSPACE"
+                  ? "white"
+                  : keyColors[key].text
+              }
               onKeyPressed={onKeyPressed}
             />
           ))}
@@ -219,7 +229,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.15,
     shadowRadius: 3,
-    elevation: 3,
+    elevation: 1,
   },
   keyText: {
     fontWeight: "bold",

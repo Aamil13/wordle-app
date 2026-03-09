@@ -1,4 +1,4 @@
-import { Colors } from "@/constants/Colors";
+import { useTheme } from "@/utils/useTheme";
 import React from "react";
 import {
   Text as RNText,
@@ -6,20 +6,19 @@ import {
   StyleSheet,
   TextProps,
   TextStyle,
-  useColorScheme,
   View,
 } from "react-native";
 
 type CellStatus = "empty" | "green" | "yellow" | "gray";
 
-interface GameCell extends TextProps {
+interface GameCellInterface extends TextProps {
   size?: number;
   status?: CellStatus;
   style?: StyleProp<TextStyle>;
   isActive?: boolean;
 }
 
-export const GameCell: React.FC<GameCell> = ({
+export const GameCell: React.FC<GameCellInterface> = ({
   size = 16,
   status = "empty",
   style,
@@ -27,32 +26,25 @@ export const GameCell: React.FC<GameCell> = ({
   isActive = false,
   ...props
 }) => {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme || "dark"];
+  const theme = useTheme();
 
   const backgroundColor =
     status === "green"
-      ? "#4CAF50"
+      ? theme.green
       : status === "yellow"
-        ? "#FFC107"
+        ? theme.yellow
         : status === "gray"
-          ? "#616161"
-          : colorScheme === "dark"
-            ? "#3a3a3c"
-            : "#f0ebebff";
+          ? theme.gray
+          : theme.cellEmpty;
 
   const textColor = status === "empty" ? theme.text : "#fff";
 
   const borderColor =
     status === "empty" ? theme.separatorColor : backgroundColor;
 
-  // Active cell gets thicker, brighter border
   const activeBorderWidth = isActive ? 3 : 2;
-  const activeBorderColor = isActive
-    ? colorScheme === "dark"
-      ? "#60A5FA"
-      : "#3B82F6"
-    : borderColor;
+
+  const finalBorderColor = isActive ? theme.activeBorder : borderColor;
 
   return (
     <View
@@ -60,7 +52,7 @@ export const GameCell: React.FC<GameCell> = ({
         styles.cell,
         {
           backgroundColor,
-          borderColor: activeBorderColor,
+          borderColor: finalBorderColor,
           borderWidth: activeBorderWidth,
         },
       ]}

@@ -7,6 +7,8 @@ import Animated, {
   withSequence,
 } from "react-native-reanimated";
 import { GameCell } from "@/components/atoms/gameCell";
+import { useAppStore } from "@/store";
+import { Colors } from "@/constants/Colors";
 
 type Props = {
   letter: string;
@@ -20,16 +22,17 @@ const AnimatedCell = ({ letter, state, index, animation }: Props) => {
   const scale = useSharedValue(1);
   const background = useSharedValue("transparent");
   const border = useSharedValue("#ccc");
+  const colorShceme = useAppStore((state) => state.theme);
+  const theme = Colors[colorShceme];
 
   React.useEffect(() => {
     if (animation === "flip") {
       const color =
         state === "green"
-          ? "#22c55e"
+          ? theme.green
           : state === "yellow"
-            ? "#eab308"
-            : "#6b7280";
-
+            ? theme.yellow
+            : theme.gray;
       rotate.value = withDelay(
         index * 120,
         withSequence(

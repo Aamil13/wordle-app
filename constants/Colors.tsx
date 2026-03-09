@@ -17,8 +17,16 @@ export const Colors = {
     placeholder: "#999",
     inputBackground: "#fff",
 
+    cellEmpty: "#f0ebebff",
+    activeBorder: "#3B82F6",
+
     separatorColor: "#bcb5b5ff",
     spinner: "#333",
+
+    //Switch colors
+    switchActive: "#4ade80",
+    switchInactive: "#d1d5db",
+    switchKnob: "#ffffff",
   },
   dark: {
     text: "#fff",
@@ -33,5 +41,16 @@ export const Colors = {
 
     separatorColor: "#e9e5e5ff",
     spinner: "#fff",
+
+    green: "#15803d",
+    yellow: "#ca8a04",
+
+    cellEmpty: "#3a3a3c",
+    activeBorder: "#60A5FA",
+
+    // Switch colors (dark mode)
+    switchActive: "#22c55e",
+    switchInactive: "#3A3A3C",
+    switchKnob: "#ffffff",
   },
 };

@@ -8,13 +8,31 @@ import confettiBG from "@/assets/game-over/confetti on transparent background.js
 import lose from "@/assets/game-over/you lose.json";
 import SessionDetails from "@/components/molecules/sessionDetails";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useSounds } from "@/gameLogic/useSounds";
+import { useEffect } from "react";
 const GameOverScreen = () => {
   const router = useRouter();
+  const { playTrumpet, playFail, isGameOverLoaded, loadGameOverSounds } =
+    useSounds();
 
   const { win } = useLocalSearchParams<{
     win: string;
   }>();
   const isLose = win === "false";
+
+  useEffect(() => {
+    loadGameOverSounds();
+  }, []);
+
+  useEffect(() => {
+    if (!isGameOverLoaded) return;
+
+    if (win !== "false") {
+      playTrumpet();
+    } else {
+      playFail();
+    }
+  }, [isGameOverLoaded]);
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>

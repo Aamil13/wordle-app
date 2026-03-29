@@ -1,6 +1,5 @@
 import { db } from "./sqlLite";
 
-
 type WordItem = {
   _id?: string; // MongoDB ObjectId as string
   word: string;
@@ -16,43 +15,150 @@ type WordRow = {
 };
 
 // MUST call this FIRST before any other database operations
+// export const initDatabase = () => {
+//   try {
+//     db.execSync(`
+//       CREATE TABLE IF NOT EXISTS words (
+//         id INTEGER PRIMARY KEY AUTOINCREMENT,
+//         mongo_id TEXT UNIQUE,
+//         word TEXT NOT NULL,
+//         hint TEXT NOT NULL
+//       );
+//     `);
+//     console.log("Database initialized successfully");
+//   } catch (error) {
+//     console.error("Error initializing database:", error);
+//   }
+// };
+// export const initDatabase = () => {
+//   try {
+//     db.execSync(`
+//       PRAGMA journal_mode = WAL;
+
+//       CREATE TABLE IF NOT EXISTS words (
+//         id INTEGER PRIMARY KEY AUTOINCREMENT,
+//         mongo_id TEXT UNIQUE,
+//         word TEXT NOT NULL,
+//         hint TEXT NOT NULL
+//       );
+
+//       CREATE TABLE IF NOT EXISTS settings (
+//         id INTEGER PRIMARY KEY,
+//         bgEnabled INTEGER NOT NULL DEFAULT 1,
+//         hapticsEnabled INTEGER NOT NULL DEFAULT 1,
+//         keyboardSoundEnabled INTEGER NOT NULL DEFAULT 1,
+//         volume REAL NOT NULL DEFAULT 0.5
+//       );
+
+//       CREATE TABLE IF NOT EXISTS stats (
+//         id INTEGER PRIMARY KEY,
+//         streak INTEGER NOT NULL DEFAULT 0,
+//         bestStreak INTEGER NOT NULL DEFAULT 0,
+//         lastPlayedDate TEXT
+//       );
+//     `);
+
+//     // Ensure single row exists for settings
+//     db.execSync(`
+//       INSERT OR IGNORE INTO settings (id)
+//       VALUES (1);
+//     `);
+
+//     // Ensure single row exists for stats
+//     db.execSync(`
+//       INSERT OR IGNORE INTO stats (id)
+//       VALUES (1);
+//     `);
+
+//     console.log("Database initialized successfully");
+//   } catch (error) {
+//     console.error("Error initializing database:", error);
+//   }
+// };
+
 export const initDatabase = () => {
   try {
     db.execSync(`
+      PRAGMA journal_mode = WAL;
+
       CREATE TABLE IF NOT EXISTS words (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         mongo_id TEXT UNIQUE,
         word TEXT NOT NULL,
         hint TEXT NOT NULL
       );
+
+      CREATE TABLE IF NOT EXISTS settings (
+        id INTEGER PRIMARY KEY,
+        bgEnabled INTEGER NOT NULL DEFAULT 1,
+        hapticsEnabled INTEGER NOT NULL DEFAULT 1,
+        keyboardSoundEnabled INTEGER NOT NULL DEFAULT 1,
+        theme TEXT NOT NULL DEFAULT 'dark',
+        volume REAL NOT NULL DEFAULT 0.5
+      );
+
+      CREATE TABLE IF NOT EXISTS stats (
+        id INTEGER PRIMARY KEY,
+        streak INTEGER NOT NULL DEFAULT 0,
+        bestStreak INTEGER NOT NULL DEFAULT 0,
+        lastPlayedDate TEXT
+      );
     `);
-    console.log('Database initialized successfully');
+
+    // 🔥 MIGRATION: Add missing column safely
+    // try {
+    //   db.execSync(`
+    //     ALTER TABLE settings
+    //     ADD COLUMN keyboardSoundEnabled INTEGER NOT NULL DEFAULT 1;
+    //   `);
+    //   console.log("Added keyboardSoundEnabled column");
+    // } catch (e) {
+    //   // Column already exists — ignore
+    // }
+    try {
+      db.execSync(`
+        ALTER TABLE settings
+        ADD COLUMN theme TEXT NOT NULL DEFAULT 'dark';
+      `);
+    } catch {}
+
+    db.execSync(`
+      INSERT OR IGNORE INTO settings (id)
+      VALUES (1);
+    `);
+
+    db.execSync(`
+      INSERT OR IGNORE INTO stats (id)
+      VALUES (1);
+    `);
+
+    console.log("Database initialized successfully");
   } catch (error) {
-    console.error('Error initializing database:', error);
+    console.error("Error initializing database:", error);
   }
 };
 
 // Save with MongoDB _id
 export const saveWordsToDatabase = (words: WordItem[]) => {
   try {
-    db.runSync('DELETE FROM words');
-    
+    db.runSync("DELETE FROM words");
+
     const statement = db.prepareSync(
-      'INSERT INTO words (mongo_id, word, hint) VALUES (?, ?, ?)'
+      "INSERT INTO words (mongo_id, word, hint) VALUES (?, ?, ?)",
     );
-    
+
     for (const item of words) {
       statement.executeSync([
-        item._id || '', // Store MongoDB _id
+        item._id || "", // Store MongoDB _id
         item.word,
-        item.hint
+        item.hint,
       ]);
     }
-    
+
     statement.finalizeSync();
-    console.log('Words saved successfully');
+    console.log("Words saved successfully");
   } catch (error) {
-    console.error('Error saving words:', error);
+    console.error("Error saving words:", error);
   }
 };
 
@@ -60,29 +166,27 @@ export const saveWordsToDatabase = (words: WordItem[]) => {
 export const addWordsToDatabase = (words: WordItem[]) => {
   try {
     const statement = db.prepareSync(
-      'INSERT OR REPLACE INTO words (mongo_id, word, hint) VALUES (?, ?, ?)'
+      "INSERT OR REPLACE INTO words (mongo_id, word, hint) VALUES (?, ?, ?)",
     );
-    
+
     for (const item of words) {
-      statement.executeSync([
-        item._id || '',
-        item.word,
-        item.hint
-      ]);
+      statement.executeSync([item._id || "", item.word, item.hint]);
     }
-    
+
     statement.finalizeSync();
-    console.log('Words added successfully');
+    console.log("Words added successfully");
   } catch (error) {
-    console.error('Error adding words:', error);
+    console.error("Error adding words:", error);
   }
 };
 
 // Delete by MongoDB _id
 export const deleteWordByMongoId = (mongoId: string) => {
   try {
-    const result = db.runSync('DELETE FROM words WHERE mongo_id = ?', [mongoId]);
-    
+    const result = db.runSync("DELETE FROM words WHERE mongo_id = ?", [
+      mongoId,
+    ]);
+
     if (result.changes > 0) {
       console.log(`Word with MongoDB ID ${mongoId} deleted successfully`);
       return true;
@@ -91,7 +195,7 @@ export const deleteWordByMongoId = (mongoId: string) => {
       return false;
     }
   } catch (error) {
-    console.error('Error deleting word:', error);
+    console.error("Error deleting word:", error);
     return false;
   }
 };
@@ -100,17 +204,17 @@ export const deleteWordByMongoId = (mongoId: string) => {
 export const deleteWordsByMongoIds = (mongoIds: string[]) => {
   try {
     if (mongoIds.length === 0) return 0;
-    
-    const placeholders = mongoIds.map(() => '?').join(',');
+
+    const placeholders = mongoIds.map(() => "?").join(",");
     const result = db.runSync(
       `DELETE FROM words WHERE mongo_id IN (${placeholders})`,
-      mongoIds
+      mongoIds,
     );
-    
+
     console.log(`${result.changes} words deleted`);
     return result.changes;
   } catch (error) {
-    console.error('Error deleting words:', error);
+    console.error("Error deleting words:", error);
     return 0;
   }
 };
@@ -118,8 +222,8 @@ export const deleteWordsByMongoIds = (mongoIds: string[]) => {
 // Delete by SQLite ID (if you still need it)
 export const deleteWordById = (id: number) => {
   try {
-    const result = db.runSync('DELETE FROM words WHERE id = ?', [id]);
-    
+    const result = db.runSync("DELETE FROM words WHERE id = ?", [id]);
+
     if (result.changes > 0) {
       console.log(`Word with ID ${id} deleted successfully`);
       return true;
@@ -128,7 +232,7 @@ export const deleteWordById = (id: number) => {
       return false;
     }
   } catch (error) {
-    console.error('Error deleting word:', error);
+    console.error("Error deleting word:", error);
     return false;
   }
 };
@@ -137,11 +241,11 @@ export const deleteWordById = (id: number) => {
 export const getWordsWithIds = (): WordRow[] => {
   try {
     const result = db.getAllSync<WordRow>(
-      'SELECT id, mongo_id, word, hint FROM words'
+      "SELECT id, mongo_id, word, hint FROM words",
     );
     return result;
   } catch (error) {
-    console.error('Error retrieving words:', error);
+    console.error("Error retrieving words:", error);
     return [];
   }
 };
@@ -150,26 +254,25 @@ export const getWordsWithIds = (): WordRow[] => {
 export const getWordsFromDatabase = (): WordItem[] => {
   try {
     const result = db.getAllSync<WordItem>(
-      'SELECT mongo_id as _id, word, hint FROM words'
+      "SELECT mongo_id as _id, word, hint FROM words",
     );
     return result;
   } catch (error) {
-    console.error('Error retrieving words:', error);
+    console.error("Error retrieving words:", error);
     return [];
   }
 };
 
-
-// get ramdom words 
+// get ramdom words
 export const getRandomWords = (count: number): WordItem[] => {
   try {
     const result = db.getAllSync<WordItem>(
-      'SELECT mongo_id as _id, word, hint FROM words ORDER BY RANDOM() LIMIT ?',
-      [count]
+      "SELECT mongo_id as _id, word, hint FROM words ORDER BY RANDOM() LIMIT ?",
+      [count],
     );
     return result;
   } catch (error) {
-    console.error('Error getting random words:', error);
+    console.error("Error getting random words:", error);
     return [];
   }
 };
@@ -178,40 +281,39 @@ export const getRandomWords = (count: number): WordItem[] => {
 export const replaceFirstNWords = (n: number, newWords: WordItem[]) => {
   try {
     const idsToDelete = db.getAllSync<{ id: number }>(
-      'SELECT id FROM words ORDER BY id ASC LIMIT ?',
-      [n]
+      "SELECT id FROM words ORDER BY id ASC LIMIT ?",
+      [n],
     );
-    
+
     if (idsToDelete.length > 0) {
-      const ids = idsToDelete.map(row => row.id).join(',');
+      const ids = idsToDelete.map((row) => row.id).join(",");
       db.runSync(`DELETE FROM words WHERE id IN (${ids})`);
     }
-    
+
     const statement = db.prepareSync(
-      'INSERT INTO words (mongo_id, word, hint) VALUES (?, ?, ?)'
+      "INSERT INTO words (mongo_id, word, hint) VALUES (?, ?, ?)",
     );
-    
+
     for (const item of newWords) {
-      statement.executeSync([item._id || '', item.word, item.hint]);
+      statement.executeSync([item._id || "", item.word, item.hint]);
     }
-    
+
     statement.finalizeSync();
     console.log(`Replaced first ${n} words`);
   } catch (error) {
-    console.error('Error replacing words:', error);
+    console.error("Error replacing words:", error);
   }
 };
-
 
 // Get total number of words in database
 export const getTotalWordCount = (): number => {
   try {
     const result = db.getFirstSync<{ count: number }>(
-      'SELECT COUNT(*) as count FROM words'
+      "SELECT COUNT(*) as count FROM words",
     );
     return result?.count || 0;
   } catch (error) {
-    console.error('Error getting total word count:', error);
+    console.error("Error getting total word count:", error);
     return 0;
   }
 };

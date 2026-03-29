@@ -1,4 +1,5 @@
 import { Colors } from "@/constants/Colors";
+import { useAppStore } from "@/store";
 import React from "react";
 import {
   Text as RNText,
@@ -21,9 +22,9 @@ export const CustomText: React.FC<CustomTextProps> = ({
   children,
   ...props
 }) => {
-  const colorScheme = useColorScheme();
+  const theme = useAppStore((state) => state.theme);
+  const defaultColor = Colors[theme || "dark"].text;
 
-  const defaultColor = Colors[colorScheme || "dark"].text;
   if (!color) {
     color = defaultColor;
   }

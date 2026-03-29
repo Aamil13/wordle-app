@@ -3,10 +3,12 @@ import CustomKeyboard from "@/components/molecules/customKeyboard";
 import AnimatedCell from "@/components/molecules/game/animatedCell";
 import AnimatedRow from "@/components/molecules/game/animatedRow";
 import { useGame } from "@/gameLogic/useGame";
+import { useHaptics } from "@/gameLogic/useHaptics";
+import { useSounds } from "@/gameLogic/useSounds";
 import { getRandomWords } from "@/localDb/pushToSqlLite";
 import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
 import { useRouter } from "expo-router";
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 
 const GameScreen = () => {
@@ -19,16 +21,40 @@ const GameScreen = () => {
     maxFails: 3,
   });
 
-  const handleKeyPress = (key: string) => {
+  const { loadGameSounds, playSuccess, playWarning } = useSounds();
+  const { light, success, error } = useHaptics();
+
+  const handleKeyPress = async (key: string) => {
+    await light();
     if (key === "ENTER") return submit();
     if (key === "BACKSPACE") return backspace();
     addLetter(key);
   };
 
   useEffect(() => {
-    if (state.isWin) navigate.navigate("/game-over?win=true");
-    if (state.isLose) navigate.navigate("/game-over?win=false");
+    if (state.isWin) navigate.replace("/game-over?win=true");
+    if (state.isLose) navigate.replace("/game-over?win=false");
   }, [state.isWin, state.isLose]);
+
+  useEffect(() => {
+    loadGameSounds();
+  }, []);
+
+  useEffect(() => {
+    // if (state.cellAnimation.type === "flip") {
+    //   playFlip();
+    // }
+
+    if (state.cellAnimation.type === "success") {
+      success();
+      playSuccess();
+    }
+
+    if (state.rowAnimation.type === "shake") {
+      error();
+      playWarning();
+    }
+  }, [state.cellAnimation, state.rowAnimation]);
 
   if (!state.rows.length) return null;
 
@@ -40,25 +66,6 @@ const GameScreen = () => {
         </View>
 
         <View style={styles.rowsContainer}>
-          {/*{state.rows.map((row, rowIndex) => (
-            <AnimatedRow
-              key={rowIndex}
-              triggerShake={rowIndex === state.curRow}
-            >
-              <View style={styles.cellContainer}>
-                {row.map((cell, cellIndex) => (
-                  <AnimatedCell
-                    key={`${rowIndex}-${cellIndex}`}
-                    letter={cell}
-                    state={state.letterStates[rowIndex]?.[cellIndex] ?? "empty"}
-                    index={cellIndex}
-                    triggerFlip={state.evaluatedRows[rowIndex]}
-                  />
-                ))}
-              </View>
-            </AnimatedRow>
-          ))}*/}
-
           {state.rows.map((row, rowIndex) => (
             <AnimatedRow
               key={rowIndex}
@@ -92,6 +99,7 @@ const GameScreen = () => {
         <CustomKeyboard
           {...state.keyboardColors}
           onKeyPressed={handleKeyPress}
+          backSpaceDanger={state.backspaceDanger || false}
         />
       </View>
     </SafeAreaWrapper>

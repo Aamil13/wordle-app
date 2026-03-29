@@ -1,4 +1,10 @@
-import { CellState, GameConfig, GameState } from "./gameTypes";
+import {
+  CellAnimation,
+  CellState,
+  GameConfig,
+  GameState,
+  RowAnimation,
+} from "./gameTypes";
 
 export const initGameState = (config: GameConfig): GameState => {
   return {
@@ -21,6 +27,7 @@ export const initGameState = (config: GameConfig): GameState => {
     },
     rowAnimation: { type: "idle", rowIndex: null },
     cellAnimation: { type: "idle", rowIndex: null },
+    backspaceDanger: false,
   };
 };
 
@@ -125,17 +132,21 @@ export const gameReducer = (
       const isLose = failCount <= 0;
 
       // 🎯 Animations
-      let rowAnimation = { type: "idle", rowIndex: null };
-      let cellAnimation = { type: "idle", rowIndex: null };
+      let rowAnimation: RowAnimation = { type: "idle", rowIndex: null };
+      let cellAnimation: CellAnimation = { type: "idle", rowIndex: null };
+      let backspaceDanger: boolean = false;
 
       if (!isCorrect) {
         rowAnimation = { type: "shake", rowIndex: state.curRow };
-        cellAnimation = { type: "flip", rowIndex: state.curRow };
+        backspaceDanger = true;
+        // cellAnimation = { type: "flip", rowIndex: state.curRow };
       }
 
       if (isCorrect) {
+        cellAnimation = { type: "flip", rowIndex: state.curRow };
         cellAnimation = { type: "success", rowIndex: state.curRow };
         rowAnimation = { type: "row-enter", rowIndex: nextRow };
+        backspaceDanger = false;
       }
 
       return {
@@ -149,6 +160,7 @@ export const gameReducer = (
         isLose,
         rowAnimation,
         cellAnimation,
+        backspaceDanger,
       };
     }
 

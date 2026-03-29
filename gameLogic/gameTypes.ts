@@ -40,4 +40,5 @@ export type GameState = {
   // 👇 ADD THESE
   rowAnimation: RowAnimation;
   cellAnimation: CellAnimation;
+  backspaceDanger: boolean;
 };

@@ -5,21 +5,28 @@ import shuffleSound from "@/assets/sounds/shuffle.mp3";
 import successChime from "@/assets/sounds/success-chime.mp3";
 import warningSoundFile from "@/assets/sounds/warning.mp3";
 
+import keySound from "@/assets/sounds/key.mp3";
+
 import trumpetsSound from "@/assets/sounds/trumpets.mp3";
 import failSoundFile from "@/assets/sounds/fail.mp3";
+import { useAppStore } from "@/store";
 
 export const useSounds = () => {
   // 🎮 Game sounds
   const flipSound = useRef<Audio.Sound | null>(null);
   const successSound = useRef<Audio.Sound | null>(null);
   const warningSound = useRef<Audio.Sound | null>(null);
-
+  const keyPressSound = useRef<Audio.Sound | null>(null);
   // 🏁 Game Over sounds
   const trumpetSound = useRef<Audio.Sound | null>(null);
   const failSound = useRef<Audio.Sound | null>(null);
 
   const [isGameLoaded, setIsGameLoaded] = useState(false);
   const [isGameOverLoaded, setIsGameOverLoaded] = useState(false);
+
+  const keyboardSoundEnabled = useAppStore(
+    (state) => state.keyboardSoundEnabled,
+  );
 
   /* =========================
      GAME SOUNDS
@@ -30,10 +37,11 @@ export const useSounds = () => {
       flipSound.current = new Audio.Sound();
       successSound.current = new Audio.Sound();
       warningSound.current = new Audio.Sound();
-
+      keyPressSound.current = new Audio.Sound();
       await flipSound.current.loadAsync(shuffleSound);
       await successSound.current.loadAsync(successChime);
       await warningSound.current.loadAsync(warningSoundFile);
+      await keyPressSound.current.loadAsync(keySound);
 
       setIsGameLoaded(true);
     } catch (e) {
@@ -45,6 +53,7 @@ export const useSounds = () => {
     await flipSound.current?.unloadAsync();
     await successSound.current?.unloadAsync();
     await warningSound.current?.unloadAsync();
+    await keyPressSound.current?.unloadAsync();
   };
 
   /* =========================
@@ -75,7 +84,7 @@ export const useSounds = () => {
   ========================== */
 
   const safePlay = async (sound: Audio.Sound | null, isLoaded: boolean) => {
-    if (!sound || !isLoaded) return;
+    if (!sound || !isLoaded || !keyboardSoundEnabled) return;
 
     try {
       await sound.stopAsync();
@@ -89,6 +98,7 @@ export const useSounds = () => {
   const playFlip = () => safePlay(flipSound.current, isGameLoaded);
   const playSuccess = () => safePlay(successSound.current, isGameLoaded);
   const playWarning = () => safePlay(warningSound.current, isGameLoaded);
+  const playKeyPress = () => safePlay(keyPressSound.current, isGameLoaded);
 
   const playTrumpet = () => safePlay(trumpetSound.current, isGameOverLoaded);
 
@@ -116,5 +126,6 @@ export const useSounds = () => {
     playTrumpet,
     playFail,
     isGameOverLoaded,
+    playKeyPress,
   };
 };

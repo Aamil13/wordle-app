@@ -16,7 +16,6 @@ import { setOnboarding } from "@/storage/onboardStorage";
 import { useAppStore } from "@/store";
 import { presentBottomSheet } from "@/utils/presentBottomSheet";
 import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
-import { SignedIn, SignedOut, useAuth, useClerk } from "@clerk/clerk-expo";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Link, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
@@ -27,33 +26,21 @@ const Main = () => {
   const aboutBottomSheetRef = useRef<BottomSheetModal>(null);
   const settingsRef = useRef<BottomSheetModal>(null);
   const router = useRouter();
-
-  const { signOut } = useClerk();
-  const { isLoaded } = useAuth();
   const { play, stop } = useAudio();
 
   const bgEnabled = useAppStore((s) => s.bgEnabled);
-  const toggleBg = useAppStore((s) => s.toggleBg);
   const isHydrated = useAppStore((s) => s.isHydrated);
 
   /* -------------------- Handlers -------------------- */
-
-  const handleToggleBg = useCallback(() => {
-    toggleBg();
-    saveSettingsToDb();
-  }, [toggleBg]);
 
   const handlePlay = useCallback(() => {
     router.push("/game");
   }, [router]);
 
   const handleSignOut = useCallback(() => {
-    signOut();
-  }, [signOut]);
+    // signOut();
+  }, []);
 
-  const handlePresentAboutModalPress = () => {
-    presentBottomSheet(aboutBottomSheetRef);
-  };
   const handlePresentSettingsModalPress = () => {
     presentBottomSheet(settingsRef);
   };
@@ -80,8 +67,6 @@ const Main = () => {
 
     bgEnabled ? play() : stop();
   }, [bgEnabled, isHydrated, play, stop]);
-
-  if (!isLoaded) return null;
 
   return (
     <>
@@ -117,26 +102,25 @@ const Main = () => {
               initialRotation={-10}
               variant="primary"
             />
-            <SignedOut>
-              <Link href="/login" asChild>
-                <CustomButton
-                  text={"Sign In"}
-                  onPress={() => {}}
-                  initialRotation={4}
-                  variant="success"
-                />
-              </Link>
-            </SignedOut>
-            <SignedIn>
-              {/* <Link href="/login" asChild> */}
+
+            <Link href="/login" asChild>
               <CustomButton
-                text={"Sign Out"}
-                onPress={handleSignOut}
+                text={"Sign In"}
+                onPress={() => {}}
                 initialRotation={4}
                 variant="success"
               />
-              {/* </Link> */}
-            </SignedIn>
+            </Link>
+
+            {/* <Link href="/login" asChild> */}
+            <CustomButton
+              text={"Sign Out"}
+              onPress={handleSignOut}
+              initialRotation={4}
+              variant="success"
+            />
+            {/* </Link> */}
+
             {/*<CustomButton
               text={"About"}
               onPress={handlePresentAboutModalPress}

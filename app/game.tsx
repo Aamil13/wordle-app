@@ -21,10 +21,12 @@ const GameScreen = () => {
     maxFails: 3,
   });
 
-  const { loadGameSounds, playSuccess, playWarning } = useSounds();
+  const { loadGameSounds, playSuccess, playWarning, playKeyPress } =
+    useSounds();
   const { light, success, error } = useHaptics();
 
   const handleKeyPress = async (key: string) => {
+    playKeyPress();
     await light();
     if (key === "ENTER") return submit();
     if (key === "BACKSPACE") return backspace();

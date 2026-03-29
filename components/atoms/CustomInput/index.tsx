@@ -7,11 +7,12 @@ import {
   TextInput,
   TextStyle,
   TouchableOpacity,
-  useColorScheme,
   View,
   ViewStyle,
 } from "react-native";
 import { CustomText } from "../customText";
+import { useAppStore } from "@/store";
+import PasswordStrength from "@/components/molecules/auth/passwordStrengthMeter";
 
 type Props = {
   value?: string;
@@ -30,6 +31,9 @@ type Props = {
   keyboardType?: "default" | "email-address" | "numeric";
   secureTextEntry?: boolean;
   isRounded?: boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
+  isPasswordStrengthMeterShown?: boolean;
 };
 
 const CustomInput: React.FC<Props> = ({
@@ -49,8 +53,11 @@ const CustomInput: React.FC<Props> = ({
   keyboardType = "default",
   secureTextEntry = false,
   isRounded = false,
+  onFocus,
+  onBlur,
+  isPasswordStrengthMeterShown,
 }) => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useAppStore((state) => state.theme);
   const theme = Colors[colorScheme || "dark"];
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -89,6 +96,8 @@ const CustomInput: React.FC<Props> = ({
           keyboardType={keyboardType}
           secureTextEntry={isPassword && !isPasswordVisible}
           style={[styles.input, { color: theme.text }, inputStyle]}
+          onFocus={onFocus}
+          onBlur={onBlur}
         />
 
         {isPassword && (
@@ -104,7 +113,9 @@ const CustomInput: React.FC<Props> = ({
           </TouchableOpacity>
         )}
       </View>
-
+      {isPasswordStrengthMeterShown && (
+        <PasswordStrength password={value || ""} />
+      )}
       {error ? (
         <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text>
       ) : null}

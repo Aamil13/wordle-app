@@ -1,6 +1,12 @@
 import { useAudio } from "@/context/audio";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -23,6 +29,8 @@ interface ButtonProps {
   icon?: React.ReactNode;
   iconPosition?: IconPosition;
   width?: "auto" | "100%" | "50%";
+  isDisable?: boolean;
+  isPending?: boolean;
 }
 
 export const CustomButton: React.FC<ButtonProps> = ({
@@ -36,6 +44,8 @@ export const CustomButton: React.FC<ButtonProps> = ({
   icon,
   iconPosition = "left",
   width = "auto",
+  isDisable,
+  isPending,
 }) => {
   const { playButtonSound } = useAudio();
   const scale = useSharedValue(1);
@@ -105,6 +115,7 @@ export const CustomButton: React.FC<ButtonProps> = ({
         onPressOut={handlePressOut}
         onPress={handlePress}
         activeOpacity={0.8}
+        disabled={isDisable || isPending}
         style={[
           styles.button,
           {
@@ -116,22 +127,30 @@ export const CustomButton: React.FC<ButtonProps> = ({
         ]}
       >
         <View style={[styles.content, { gap: sizeConf.iconGap }]}>
-          {icon && iconPosition === "left" && (
-            <View style={styles.iconContainer}>{icon}</View>
-          )}
-          <Text
-            style={[
-              styles.text,
-              {
-                color: finalTextColor,
-                fontSize: sizeConf.font,
-              },
-            ]}
-          >
-            {text}
-          </Text>
-          {icon && iconPosition === "right" && (
-            <View style={styles.iconContainer}>{icon}</View>
+          {isPending ? (
+            <ActivityIndicator color={finalTextColor} />
+          ) : (
+            <>
+              {icon && iconPosition === "left" && (
+                <View style={styles.iconContainer}>{icon}</View>
+              )}
+
+              <Text
+                style={[
+                  styles.text,
+                  {
+                    color: finalTextColor,
+                    fontSize: sizeConf.font,
+                  },
+                ]}
+              >
+                {text}
+              </Text>
+
+              {icon && iconPosition === "right" && (
+                <View style={styles.iconContainer}>{icon}</View>
+              )}
+            </>
           )}
         </View>
       </TouchableOpacity>

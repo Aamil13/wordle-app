@@ -64,7 +64,7 @@ export default function AppNavigator({
           router,
           headerTextColor,
           backgroundColor: headerBgColor,
-          title: "forgot-password",
+          title: "register",
         })}
       />
 

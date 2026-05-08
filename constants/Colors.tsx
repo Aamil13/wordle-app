@@ -27,6 +27,11 @@ export const Colors = {
     switchActive: "#4ade80",
     switchInactive: "#d1d5db",
     switchKnob: "#ffffff",
+
+    // toast
+    toast_background: "#ffffff",
+    toast_text: "#1f2937",
+    toast_indicator: "#3B82F6",
   },
   dark: {
     text: "#fff",
@@ -52,5 +57,10 @@ export const Colors = {
     switchActive: "#22c55e",
     switchInactive: "#3A3A3C",
     switchKnob: "#ffffff",
+
+    // toast
+    toast_background: "#1f1f1f",
+    toast_text: "#f9fafb",
+    toast_indicator: "#60A5FA",
   },
 };

@@ -10,17 +10,27 @@ import KeyboardScreenWrapper from "@/components/molecules/KeyboardScreenWrapper"
 import { CustomText } from "@/components/atoms/customText";
 import { useTheme } from "@/utils/useTheme";
 import register from "@/assets/auth/register.json";
+import { validationRules } from "@/utils/validationRules";
+
 export default function RegisterScreen() {
   const router = useRouter();
   const theme = useTheme();
-  const { control, handleSubmit, watch } = useForm();
+  const { control, handleSubmit } = useForm();
 
-  const password = watch("password");
-
-  const onSubmit = async (data: any) => {
-    console.log(data);
-
-    router.push("/verify-otp");
+  const onSubmit = async (data: {
+    userName: string;
+    email: string;
+    password: string;
+  }) => {
+    // router.push("/verify-otp");
+    router.push({
+      pathname: "/verify-otp",
+      params: {
+        username: data.userName,
+        password: data.password,
+        email: data.email,
+      },
+    });
   };
 
   return (
@@ -33,11 +43,16 @@ export default function RegisterScreen() {
             <Controller
               control={control}
               name="userName"
-              render={({ field: { onChange, value } }) => (
+              rules={validationRules.required("Username")}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
                 <FloatingInput
                   label="Username"
                   value={value}
                   onChangeText={onChange}
+                  error={error?.message}
                 />
               )}
             />
@@ -45,12 +60,17 @@ export default function RegisterScreen() {
             <Controller
               control={control}
               name="email"
-              render={({ field: { onChange, value } }) => (
+              rules={validationRules.email}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
                 <FloatingInput
                   label="Email"
                   keyboardType="email-address"
                   value={value}
                   onChangeText={onChange}
+                  error={error?.message}
                 />
               )}
             />
@@ -58,7 +78,11 @@ export default function RegisterScreen() {
             <Controller
               control={control}
               name="password"
-              render={({ field: { onChange, value } }) => (
+              rules={validationRules.password}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
                 <>
                   <FloatingInput
                     label="Password"
@@ -66,6 +90,7 @@ export default function RegisterScreen() {
                     value={value}
                     onChangeText={onChange}
                     isPasswordStrengthMeterShown={true}
+                    error={error?.message}
                   />
                 </>
               )}

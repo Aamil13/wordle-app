@@ -10,14 +10,17 @@ import KeyboardScreenWrapper from "@/components/molecules/KeyboardScreenWrapper"
 import { useTheme } from "@/utils/useTheme";
 import { CustomText } from "@/components/atoms/customText";
 import loginAnimation from "@/assets/auth/Login.json";
+import { useLogin } from "@/services/auth/hooks";
+import { validationRules } from "@/utils/validationRules";
 
 export default function LoginScreen() {
   const router = useRouter();
   const theme = useTheme();
   const { control, handleSubmit } = useForm();
+  const { mutate, isPending } = useLogin();
 
   const onSubmit = async (data: any) => {
-    console.log(data);
+    mutate(data);
   };
 
   return (
@@ -30,12 +33,17 @@ export default function LoginScreen() {
             <Controller
               control={control}
               name="email"
-              render={({ field: { onChange, value } }) => (
+              rules={validationRules.email}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
                 <FloatingInput
                   label="Email"
                   value={value}
                   keyboardType="email-address"
                   onChangeText={onChange}
+                  error={error?.message}
                 />
               )}
             />
@@ -44,12 +52,17 @@ export default function LoginScreen() {
               <Controller
                 control={control}
                 name="password"
-                render={({ field: { onChange, value } }) => (
+                rules={validationRules.password}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
                   <FloatingInput
                     label="Password"
                     secureTextEntry
                     value={value}
                     onChangeText={onChange}
+                    error={error?.message}
                   />
                 )}
               />
@@ -69,6 +82,7 @@ export default function LoginScreen() {
                 width="100%"
                 onPress={handleSubmit(onSubmit)}
                 size="large"
+                isPending={isPending}
               />
 
               <CustomText fontFamily="IoSevca">

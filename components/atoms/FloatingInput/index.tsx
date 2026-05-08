@@ -11,6 +11,7 @@ import CustomInput from "../CustomInput";
 type Props = React.ComponentProps<typeof CustomInput> & {
   label: string;
   isPasswordStrengthMeterShown?: boolean;
+  error?: string;
 };
 
 export default function FloatingInput({
@@ -18,6 +19,7 @@ export default function FloatingInput({
   value,
   onChangeText,
   isPasswordStrengthMeterShown = false,
+  error,
   ...props
 }: Props) {
   const [focused, setFocused] = useState(false);
@@ -56,6 +58,7 @@ export default function FloatingInput({
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         isPasswordStrengthMeterShown={isPasswordStrengthMeterShown}
+        error={error}
       />
     </View>
   );

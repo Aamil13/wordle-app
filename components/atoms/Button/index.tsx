@@ -1,3 +1,4 @@
+import { useAudio } from "@/context/audio";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
@@ -21,6 +22,7 @@ interface ButtonProps {
   initialRotation?: number;
   icon?: React.ReactNode;
   iconPosition?: IconPosition;
+  width?: "auto" | "100%" | "50%";
 }
 
 export const CustomButton: React.FC<ButtonProps> = ({
@@ -33,9 +35,16 @@ export const CustomButton: React.FC<ButtonProps> = ({
   initialRotation = 0,
   icon,
   iconPosition = "left",
+  width = "auto",
 }) => {
+  const { playButtonSound } = useAudio();
   const scale = useSharedValue(1);
   const rotation = useSharedValue(initialRotation);
+
+  const handlePress = () => {
+    playButtonSound();
+    onPress();
+  };
 
   // VARIANT STYLES
   const variantStyles: Record<ButtonVariant, { bg: string; text: string }> = {
@@ -53,7 +62,7 @@ export const CustomButton: React.FC<ButtonProps> = ({
   > = {
     small: { paddingV: 8, paddingH: 24, font: 14, iconGap: 6 },
     medium: { paddingV: 12, paddingH: 40, font: 18, iconGap: 8 },
-    large: { paddingV: 16, paddingH: 50, font: 22, iconGap: 10 },
+    large: { paddingV: 14, paddingH: 50, font: 22, iconGap: 10 },
   };
 
   const colors = variantStyles[variant];
@@ -73,28 +82,28 @@ export const CustomButton: React.FC<ButtonProps> = ({
 
     rotation.value = withSequence(
       withSpring(initialRotation - 12, { damping: 8, stiffness: 300 }),
-      withSpring(initialRotation, { damping: 8, stiffness: 300 })
+      withSpring(initialRotation, { damping: 8, stiffness: 300 }),
     );
   };
 
   const handlePressOut = () => {
     scale.value = withSequence(
       withSpring(1.15, { damping: 4, stiffness: 200, mass: 0.3 }),
-      withSpring(1, { damping: 6, stiffness: 180, mass: 0.5 })
+      withSpring(1, { damping: 6, stiffness: 180, mass: 0.5 }),
     );
 
     rotation.value = withSequence(
       withSpring(initialRotation + 6, { damping: 8, stiffness: 300 }),
-      withSpring(initialRotation, { damping: 8, stiffness: 300 })
+      withSpring(initialRotation, { damping: 8, stiffness: 300 }),
     );
   };
 
   return (
-    <Animated.View style={[styles.container, animatedStyle]}>
+    <Animated.View style={[styles.container, animatedStyle, { width: width }]}>
       <TouchableOpacity
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        onPress={onPress}
+        onPress={handlePress}
         activeOpacity={0.8}
         style={[
           styles.button,

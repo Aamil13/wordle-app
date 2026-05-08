@@ -1,6 +1,8 @@
 import React from "react";
-import { useColorScheme, View, ViewStyle } from "react-native";
+import { View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "./useTheme";
+import { useBackHandler } from "@/hooks/useBackHandler";
 
 type Props = {
   children: React.ReactNode;
@@ -8,8 +10,9 @@ type Props = {
 };
 
 const SafeAreaWrapper = ({ children, style }: Props) => {
+  useBackHandler();
   const insets = useSafeAreaInsets();
-  const scheme = useColorScheme();
+  const color = useTheme();
   return (
     <View
       style={[
@@ -19,7 +22,7 @@ const SafeAreaWrapper = ({ children, style }: Props) => {
           paddingLeft: insets.left + 16,
           paddingRight: insets.right + 16,
           flex: 1,
-          //   backgroundColor: scheme === "dark" ? "#000" : "#fff",
+          backgroundColor: color.background,
         },
 
         style,

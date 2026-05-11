@@ -31,7 +31,7 @@ export default function VerifyOtpScreen() {
       otp: "",
     },
   });
-  const { mutate, submittedAt } = useSendOtp();
+  const { mutate, submittedAt, isPending: isSendOtpPending } = useSendOtp();
   const { mutate: resendOtp } = useResendOtp();
   const {
     mutateAsync: verifyAndRegister,
@@ -74,7 +74,11 @@ export default function VerifyOtpScreen() {
       otp: formData.otp,
     };
 
-    await verifyAndRegister(payload);
+    await verifyAndRegister(payload, {
+      onSuccess: () => {
+        router.replace("/main");
+      },
+    });
   };
   return (
     <SafeAreaWrapper>
@@ -111,7 +115,7 @@ export default function VerifyOtpScreen() {
                 )}
               />
               <FormError error={errors.otp?.message} />
-              {submittedAt !== 0 && (
+              {submittedAt !== 0 && !isSendOtpPending && (
                 <TouchableOpacity
                   onPress={trigger}
                   style={styles.forgotPasswordContainer}
@@ -131,6 +135,7 @@ export default function VerifyOtpScreen() {
                 size="large"
                 width="100%"
                 onPress={handleSendOtp}
+                isPending={isSendOtpPending}
               />
             ) : (
               <CustomButton

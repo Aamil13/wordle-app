@@ -1,6 +1,7 @@
 import { View, StyleSheet } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "expo-router";
+
 import FloatingInput from "@/components/atoms/FloatingInput";
 import { CustomButton } from "@/components/atoms/Button";
 import AuthContainer from "@/components/molecules/auth/authContainer";
@@ -9,20 +10,86 @@ import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
 import KeyboardScreenWrapper from "@/components/molecules/KeyboardScreenWrapper";
 import { CustomText } from "@/components/atoms/customText";
 import { useTheme } from "@/utils/useTheme";
+
 import register from "@/assets/auth/register.json";
 import { validationRules } from "@/utils/validationRules";
+import { useIsUserEmailTaken, useIsUserNameTaken } from "@/services/auth/hooks";
+
+type RegisterFormData = {
+  userName: string;
+  email: string;
+  password: string;
+};
 
 export default function RegisterScreen() {
   const router = useRouter();
   const theme = useTheme();
-  const { control, handleSubmit } = useForm();
 
-  const onSubmit = async (data: {
-    userName: string;
-    email: string;
-    password: string;
-  }) => {
-    // router.push("/verify-otp");
+  const {
+    control,
+    handleSubmit,
+    setError,
+    clearErrors,
+    formState: { errors },
+  } = useForm<RegisterFormData>();
+
+  const { mutateAsync, isPending } = useIsUserNameTaken();
+  const {
+    mutateAsync: isUserEmailTakenMutate,
+    isPending: isUserEmailTakenPending,
+  } = useIsUserEmailTaken();
+  const checkUserName = async (userName: string) => {
+    if (!userName) return false;
+
+    try {
+      const response: any = await mutateAsync({ userName });
+      if (response?.data.isUserNameTaken) {
+        setError("userName", {
+          type: "manual",
+          message: "Username is already taken",
+        });
+
+        return false;
+      }
+
+      clearErrors("userName");
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+
+  const checkUserEmail = async (email: string) => {
+    if (!email) return false;
+
+    try {
+      const response: any = await isUserEmailTakenMutate({ email });
+      if (response?.data.isEmailTaken) {
+        setError("email", {
+          type: "manual",
+          message: "Email is already taken",
+        });
+
+        return false;
+      }
+
+      clearErrors("email");
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+
+  const onSubmit = async (data: RegisterFormData) => {
+    // const isAvailable = await checkUserName(data.userName);
+    const [isAvailable, isEmailAvailable] = await Promise.all([
+      checkUserName(data.userName),
+      checkUserEmail(data.email),
+    ]);
+    if (!isAvailable || !isEmailAvailable) return;
+
     router.push({
       pathname: "/verify-otp",
       params: {
@@ -43,7 +110,7 @@ export default function RegisterScreen() {
             <Controller
               control={control}
               name="userName"
-              rules={validationRules.required("Username")}
+              rules={validationRules.required("userName")}
               render={({
                 field: { onChange, value },
                 fieldState: { error },
@@ -83,16 +150,14 @@ export default function RegisterScreen() {
                 field: { onChange, value },
                 fieldState: { error },
               }) => (
-                <>
-                  <FloatingInput
-                    label="Password"
-                    secureTextEntry
-                    value={value}
-                    onChangeText={onChange}
-                    isPasswordStrengthMeterShown={true}
-                    error={error?.message}
-                  />
-                </>
+                <FloatingInput
+                  label="Password"
+                  secureTextEntry
+                  value={value}
+                  onChangeText={onChange}
+                  isPasswordStrengthMeterShown={true}
+                  error={error?.message}
+                />
               )}
             />
 
@@ -102,6 +167,7 @@ export default function RegisterScreen() {
               variant="primary"
               width="100%"
               size="large"
+              isDisable={!!errors.userName || isPending}
             />
 
             <CustomText fontFamily="IoSevca" style={{ textAlign: "center" }}>
@@ -113,7 +179,7 @@ export default function RegisterScreen() {
                 onPress={() => router.push("/login")}
               >
                 Sign in now
-              </CustomText>{" "}
+              </CustomText>
             </CustomText>
           </View>
         </AuthContainer>

@@ -8,18 +8,28 @@ import AuthAnimation from "@/components/molecules/auth/authAnimation";
 import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
 import KeyboardScreenWrapper from "@/components/molecules/KeyboardScreenWrapper";
 import resetPassword from "@/assets/auth/ResetPassword.json";
+import { useResetPassword } from "@/services/auth/hooks";
+import { useLocalSearchParams, useSearchParams } from "expo-router/build/hooks";
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
+  const token = useLocalSearchParams();
+  const { control, handleSubmit } = useForm();
 
-  const { control, handleSubmit, watch } = useForm();
-
-  const password = watch("password");
+  const { mutate } = useResetPassword();
 
   const onSubmit = async (data: any) => {
-    console.log(data);
-
-    router.replace("/login");
+    if (token?.token.length < 0) return;
+    const payload = {
+      token: token?.token,
+      newPassword: data?.password,
+      confirmPassword: data?.confirmPassword,
+    };
+    mutate(payload, {
+      onSuccess: () => {
+        router.replace("/login");
+      },
+    });
   };
 
   return (

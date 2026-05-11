@@ -9,15 +9,18 @@ import NetworkBanner from "@/components/molecules/networkBanner";
 
 type Props = {
   children: ReactNode;
+  headerBgColor: string;
 };
 
-export default function AppProviders({ children }: Props) {
+export default function AppProviders({ children, headerBgColor }: Props) {
   return (
     <NetworkProvider>
       <QueryClientProvider client={queryClient}>
         <AudioProvider>
           <NetworkBanner />
-          <GestureHandlerRootView style={{ flex: 1 }}>
+          <GestureHandlerRootView
+            style={{ flex: 1, backgroundColor: headerBgColor }}
+          >
             <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
           </GestureHandlerRootView>
         </AudioProvider>

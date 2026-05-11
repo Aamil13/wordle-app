@@ -18,4 +18,29 @@ type VerifyOtp = resendOtp & {
   otp: string;
 };
 
-export { loginData, sendOtp, resendOtp, VerifyOtp };
+type forgotPassword = {
+  email: string;
+};
+
+type resetPassord = {
+  token: string | string[];
+  newPassword: string;
+  confirmPassword: string;
+};
+
+type isUserNameTaken = {
+  userName: string;
+};
+
+type isUserEmailTaken = forgotPassword;
+
+export {
+  loginData,
+  sendOtp,
+  resendOtp,
+  VerifyOtp,
+  forgotPassword,
+  resetPassord,
+  isUserNameTaken,
+  isUserEmailTaken,
+};

@@ -54,7 +54,7 @@ export default function RootLayout() {
   if (!fontsLoaded || needsOnboarding === null) return null;
 
   return (
-    <AppProviders>
+    <AppProviders headerBgColor={headerBgColor}>
       <AppNavigator
         needsOnboarding={needsOnboarding}
         headerTextColor={headerTextColor}

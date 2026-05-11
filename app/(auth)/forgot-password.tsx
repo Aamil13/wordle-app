@@ -7,16 +7,20 @@ import AuthContainer from "@/components/molecules/auth/authContainer";
 import AuthAnimation from "@/components/molecules/auth/authAnimation";
 import email from "@/assets/auth/Email.json";
 import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
+import { useForgotPassword } from "@/services/auth/hooks";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
 
   const { control, handleSubmit } = useForm();
-
+  const { mutate, isPending } = useForgotPassword();
   const onSubmit = async (data: any) => {
-    console.log(data);
-
-    router.push("/verify-otp");
+    mutate(data, {
+      onSuccess: (res: { data: string }) => {
+        console.log("tokenrrrr", res);
+        router.push(`/reset-password?token=${res.data}`);
+      },
+    });
   };
 
   return (
@@ -44,6 +48,7 @@ export default function ForgotPasswordScreen() {
               text="Send OTP"
               size="large"
               onPress={handleSubmit(onSubmit)}
+              isPending={isPending}
             />
           </View>
         </View>

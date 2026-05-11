@@ -1,10 +1,12 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 // import { forceDeauthenticate } from "@/hooks/Auth/forceDeautenticate";
+import * as SecureStore from "expo-secure-store";
 import {
   PaginatedResponse,
   RequestData,
   ServerResponse,
 } from "./apiClientTypes";
+import { getUserToken } from "@/storage/userTokenStorage";
 
 const CUSTOM_BASE_URL = process.env.EXPO_PUBLIC_CUSTOM_BASE_URL;
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
@@ -19,6 +21,20 @@ const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
 });
+
+// Req Interceptor
+api.interceptors.request.use(
+  async (config) => {
+    const token = await getUserToken();
+
+    if (token) {
+      config.headers?.set("Authorization", `Bearer ${token}`);
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
 
 // ─── Response Interceptor ─────────────────────────────────────────────────────
 
@@ -112,17 +128,45 @@ async function client<T, U = unknown>(
   };
 
   try {
+    console.log("config", config);
     const response = await api<ServerResponse<T>>(config);
     return response.data;
-  } catch (err: unknown) {
-    // Re-throw a structured error instead of swallowing it silently
-    const axiosErr = err as { response?: { data?: { message?: string } } };
-    const serverMessage = axiosErr.response?.data?.message ?? "Unknown error";
-    return Promise.reject(
-      new Error(
-        `[API] ${config.method?.toUpperCase()} /${endpoint} — ${serverMessage}`,
-      ),
-    );
+    // } catch (err: any) {
+    //   let message =
+    //     err?.response?.data?.message ||
+    //     (err?.response
+    //       ? "Request failed. Please try again."
+    //       : err?.code === "ECONNABORTED"
+    //         ? "Request timed out. Please check your connection."
+    //         : "Something went wrong on our side. Please try again later.");
+
+    //   throw new Error(
+    //     `[API] ${config.method?.toUpperCase()} /${endpoint} — ${message}`,
+    //   );
+    // }
+  } catch (err: any) {
+    const data = err?.response?.data;
+    console.log("err-axiosLevel", data);
+    // ✅ If backend returned string (like rate limit)
+    if (typeof data === "string") {
+      return Promise.reject({
+        message: data,
+        statusCode: err?.response?.status,
+      });
+    }
+
+    // ✅ If backend returned structured object
+    if (data && typeof data === "object") {
+      return Promise.reject({
+        ...data,
+        statusCode: err?.response?.status,
+      });
+    }
+
+    // fallback
+    return Promise.reject({
+      message: err?.message || "Something went wrong",
+    });
   }
 }
 

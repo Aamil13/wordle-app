@@ -7,8 +7,7 @@ import { firstTime } from "@/storage/onboardStorage";
 import AppProviders from "@/providers/AppProvider";
 import AppNavigator from "@/navigation/AppNavigator";
 import { useTheme } from "@/utils/useTheme";
-import { ToastContainer } from "rn-toastify";
-import { useAppStore } from "@/store";
+import { Toasts } from "@backpackapp-io/react-native-toast";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -16,7 +15,7 @@ export const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const color = useTheme();
-  const theme = useAppStore((state) => state.theme);
+
   const headerTextColor = color.text;
   const headerBgColor = color.background;
 
@@ -55,13 +54,19 @@ export default function RootLayout() {
   if (!fontsLoaded || needsOnboarding === null) return null;
 
   return (
-    <AppProviders>
+    <AppProviders headerBgColor={headerBgColor}>
       <AppNavigator
         needsOnboarding={needsOnboarding}
         headerTextColor={headerTextColor}
         headerBgColor={headerBgColor}
       />
-      <ToastContainer theme={theme} />
+      <Toasts
+        defaultStyle={{
+          view: { backgroundColor: color.toast_background },
+          indicator: { borderColor: color.toast_indicator },
+          text: { color: color.toast_text },
+        }}
+      />
     </AppProviders>
   );
 }

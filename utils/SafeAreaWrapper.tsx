@@ -17,7 +17,7 @@ const SafeAreaWrapper = ({ children, style }: Props) => {
     <View
       style={[
         {
-          paddingTop: insets.top,
+          // paddingTop: insets.top,
           paddingBottom: insets.bottom,
           paddingLeft: insets.left + 16,
           paddingRight: insets.right + 16,

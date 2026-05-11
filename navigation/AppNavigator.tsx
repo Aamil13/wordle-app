@@ -13,7 +13,13 @@ export default function AppNavigator({
   headerBgColor,
 }: Props) {
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        contentStyle: {
+          backgroundColor: headerBgColor,
+        },
+      }}
+    >
       {needsOnboarding && (
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       )}
@@ -64,7 +70,7 @@ export default function AppNavigator({
           router,
           headerTextColor,
           backgroundColor: headerBgColor,
-          title: "forgot-password",
+          title: "register",
         })}
       />
 

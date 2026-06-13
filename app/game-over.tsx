@@ -23,8 +23,7 @@ const GameOverScreen = () => {
   }>();
   const isLose = win === "false";
   const { data: stats, isPending } = useGetStatsByMode(GameModeEnum.DAILY);
-  console.log("stats", stats);
-  console.log("isPending", isPending);
+  
   useEffect(() => {
     loadGameOverSounds();
   }, []);

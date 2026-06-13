@@ -108,7 +108,6 @@ const Main = () => {
   useEffect(() => {
     if (wordsData?.data && wordsData.data.length > 0) {
       saveWordsToDatabase(wordsData.data);
-      console.log("Saved words to SQLite:", wordsData.data.length);
     }
   }, [wordsData]);
 

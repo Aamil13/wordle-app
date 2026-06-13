@@ -1,25 +1,30 @@
-import { CustomButton } from "@/components/atoms/Button";
-import { CustomText } from "@/components/atoms/customText";
-import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
-import LottieView from "lottie-react-native";
-import { StyleSheet, View } from "react-native";
 import confetti from "@/assets/game-over/Confetti.json";
 import confettiBG from "@/assets/game-over/confetti on transparent background.json";
 import lose from "@/assets/game-over/you lose.json";
+import { CustomButton } from "@/components/atoms/Button";
+import { CustomText } from "@/components/atoms/customText";
 import SessionDetails from "@/components/molecules/sessionDetails";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSounds } from "@/gameLogic/useSounds";
+import { useGetStatsByMode } from "@/services/stats/hooks";
+import { GameModeEnum } from "@/services/stats/types";
+import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import LottieView from "lottie-react-native";
 import { useEffect } from "react";
+import { StyleSheet, View } from "react-native";
 const GameOverScreen = () => {
   const router = useRouter();
   const { playTrumpet, playFail, isGameOverLoaded, loadGameOverSounds } =
     useSounds();
+    
 
   const { win } = useLocalSearchParams<{
     win: string;
   }>();
   const isLose = win === "false";
-
+  const { data: stats, isPending } = useGetStatsByMode(GameModeEnum.DAILY);
+  console.log("stats", stats);
+  console.log("isPending", isPending);
   useEffect(() => {
     loadGameOverSounds();
   }, []);
@@ -66,7 +71,7 @@ const GameOverScreen = () => {
         <CustomText size={18}>
           {isLose ? "Better Luck Next Time" : "WOW YOU WON!"}
         </CustomText>
-        <SessionDetails />
+        <SessionDetails  />
         <CustomButton
           text={"Back to main menu"}
           onPress={() => router.replace("/main")}

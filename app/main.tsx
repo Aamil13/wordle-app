@@ -4,8 +4,13 @@ import AboutBottomSheet from "@/components/organisms/aboutBottomSheet";
 import { AppBottomSheet } from "@/components/organisms/appBottomSheet";
 import SettingsPanel from "@/components/organisms/settingsPanel";
 import { useAudio } from "@/context/audio";
+import { useNetwork } from "@/context/network";
+import { useCustomToast } from "@/hooks/useCustomToast";
+import { getTotalWordCount, saveWordsToDatabase } from "@/localDb/pushToSqlLite";
 import { loadSettingsFromDb } from "@/localDb/settingsService";
 import { useGetUserData } from "@/services/user/hooks";
+import { useGetAllWords } from "@/services/wordle/hooks";
+import { WordsApiResponse } from "@/services/wordle/types";
 import { setOnboarding } from "@/storage/onboardStorage";
 import { deleteUserToken, getUserToken } from "@/storage/userTokenStorage";
 import { useAppStore } from "@/store";
@@ -14,7 +19,7 @@ import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Link, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-import { useCallback, useEffect, useRef, useState, memo } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 // Memoized footer component
@@ -31,9 +36,12 @@ const Main = () => {
   const settingsRef = useRef<BottomSheetModal>(null);
   const router = useRouter();
   const { play, stop } = useAudio();
-
+  const { isConnected } = useNetwork();
+  const { showError } = useCustomToast();
+  const wordleDataCount = getTotalWordCount();
   const [isToken, setIsToken] = useState(false);
   const { data, isFetching } = useGetUserData(isToken);
+  const { data: wordsData } = useGetAllWords(wordleDataCount < 1) as { data: WordsApiResponse | undefined };
 
   // Zustand selectors
   const bgEnabled = useAppStore((s) => s.bgEnabled);
@@ -44,9 +52,13 @@ const Main = () => {
 
   /* -------------------- Handlers -------------------- */
 
-  const handlePlay = useCallback(() => {
-    router.push("/game");
-  }, []);
+  const handlePlay = useCallback((mode: "daily" | "infinite" | "timeattack") => {
+    if ((mode === "daily" || mode === "timeattack") && !isConnected) {
+      showError("Internet connection required for this mode");
+      return;
+    }
+    router.push(`/game?mode=${mode}`);
+  }, [isConnected, showError]);
 
   const handleSignOut = useCallback(() => {
     clearAuth();
@@ -92,6 +104,14 @@ const Main = () => {
     }
   }, [bgEnabled, isHydrated, play, stop]);
 
+  // Save words to SQLite when API returns data
+  useEffect(() => {
+    if (wordsData?.data && wordsData.data.length > 0) {
+      saveWordsToDatabase(wordsData.data);
+      console.log("Saved words to SQLite:", wordsData.data.length);
+    }
+  }, [wordsData]);
+
   return (
     <>
       <SafeAreaWrapper>
@@ -110,10 +130,25 @@ const Main = () => {
 
           <View style={styles.buttonContainer}>
             <CustomButton
-              text="Play"
-              onPress={handlePlay}
+              text="Daily Challenge"
+              onPress={() => handlePlay("daily")}
               initialRotation={-10}
               variant="primary"
+              isDisable={wordleDataCount < 1}
+            />
+              <CustomButton
+              text="Infinite"
+              onPress={() => handlePlay("infinite")}
+              initialRotation={-10}
+              variant="primary"
+              isDisable={wordleDataCount < 1}
+            />
+              <CustomButton
+              text="TimeAttack"
+              onPress={() => handlePlay("timeattack")}
+              initialRotation={-10}
+              variant="primary"
+              isDisable={wordleDataCount < 1}
             />
 
             {!isAuthenticated ? (
@@ -159,7 +194,7 @@ export default Main;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // More efficient than height: "100%"
+    flex: 1, 
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 40,

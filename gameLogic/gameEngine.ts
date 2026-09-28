@@ -3,7 +3,7 @@ import {
   CellState,
   GameConfig,
   GameState,
-  RowAnimation,
+  RowAnimation
 } from "./gameTypes";
 
 export const initGameState = (config: GameConfig): GameState => {
@@ -25,6 +25,7 @@ export const initGameState = (config: GameConfig): GameState => {
       yellowLetters: [],
       grayLetters: [],
     },
+    words: config.words,
     rowAnimation: { type: "idle", rowIndex: null },
     cellAnimation: { type: "idle", rowIndex: null },
     backspaceDanger: false,
@@ -109,7 +110,7 @@ export const gameReducer = (
 
     case "SUBMIT": {
       const guess = state.rows[state.curRow].join("");
-      const target = config.words[state.curRow].word;
+      const target = (state.words || config.words)[state.curRow].word;
 
       if (guess.length < target.length) return state;
 
@@ -149,7 +150,7 @@ export const gameReducer = (
         backspaceDanger = false;
       }
 
-      return {
+      const baseState = {
         ...state,
         letterStates,
         evaluatedRows,
@@ -162,6 +163,14 @@ export const gameReducer = (
         cellAnimation,
         backspaceDanger,
       };
+
+      // Apply mode-specific logic after successful submission
+      if (isCorrect && !isWin && !isLose) {
+        const modeState = handleModeSpecificLogic(baseState, config);
+        return { ...baseState, ...modeState };
+      }
+
+      return baseState;
     }
 
     case "CLEAR_ANIMATION":
@@ -208,4 +217,98 @@ export const computeKeyboardColorsForRow = (
     yellowLetters: [...yellow],
     grayLetters: [...gray],
   };
+};
+
+// Mode-specific handlers
+type ModeHandler = (
+  state: GameState,
+  config: GameConfig,
+) => Partial<GameState>;
+
+const infiniteModeHandler: ModeHandler = (state, config) => {
+  // Count completed rows
+  const completedRowsCount = state.evaluatedRows.filter((r) => r).length;
+
+  // If 2 or more rows are completed and user still has fails left, rotate
+  if (completedRowsCount >= 2 && state.failCount > 0) {
+    const currentRows = state.rows;
+    const currentLetterStates = state.letterStates;
+    const currentEvaluatedRows = state.evaluatedRows;
+    const currentWords = state.words;
+
+    // Remove first 2 completed rows
+    const remainingRows = currentRows.slice(2);
+    const remainingLetterStates = currentLetterStates.slice(2);
+    const remainingEvaluatedRows = currentEvaluatedRows.slice(2);
+    const remainingWords = currentWords.slice(2);
+
+    // Get the last row (which is now the first in remaining array)
+    const lastRow = remainingRows[remainingRows.length - 1];
+    const lastLetterState = remainingLetterStates[remainingLetterStates.length - 1];
+    const lastEvaluatedRow = remainingEvaluatedRows[remainingEvaluatedRows.length - 1];
+    const lastWord = remainingWords[remainingWords.length - 1];
+
+    // Get 2 new random words for the new rows
+    const { getRandomWords, incrementWordShownCount } = require("../localDb/pushToSqlLite");
+    const newWords = getRandomWords(2);
+
+    // Increment noOfTimesShown for the newly fetched words
+    newWords.forEach((word: any) => {
+      if (word._id) {
+        incrementWordShownCount(word._id);
+      }
+    });
+
+    // Create 2 new rows with empty cells based on actual word lengths
+    const newRow1 = Array.from({ length: newWords[0].word.length }, () => "");
+    const newRow2 = Array.from({ length: newWords[1].word.length }, () => "");
+    const newLetterState1: CellState[] = Array.from({ length: newWords[0].word.length }, () => "empty");
+    const newLetterState2: CellState[] = Array.from({ length: newWords[1].word.length }, () => "empty");
+
+    // Make the last row first, then add 2 new rows below it
+    const newRows = [lastRow, ...remainingRows.slice(0, -1), newRow1, newRow2];
+    const newLetterStates = [
+      lastLetterState,
+      ...remainingLetterStates.slice(0, -1),
+      newLetterState1,
+      newLetterState2,
+    ];
+    const newEvaluatedRows = [
+      lastEvaluatedRow,
+      ...remainingEvaluatedRows.slice(0, -1),
+      false,
+      false,
+    ];
+    const newWordsArray = [lastWord, ...remainingWords.slice(0, -1), ...newWords];
+
+    return {
+      rows: newRows,
+      letterStates: newLetterStates,
+      evaluatedRows: newEvaluatedRows,
+      words: newWordsArray,
+      curRow: 0, // Reset to first row
+      curCol: 0,
+    };
+  }
+
+  return {};
+};
+
+const classicModeHandler: ModeHandler = (state, config) => {
+  // Classic mode doesn't modify rows
+  return {};
+};
+
+// Mode handler registry
+const modeHandlers: Record<string, ModeHandler> = {
+  infinite: infiniteModeHandler,
+  classic: classicModeHandler,
+};
+
+export const handleModeSpecificLogic = (
+  state: GameState,
+  config: GameConfig,
+): Partial<GameState> => {
+  const handler = modeHandlers[config.mode] || classicModeHandler;
+  return handler(state, config);
 };

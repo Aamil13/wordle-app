@@ -5,20 +5,31 @@ import AnimatedRow from "@/components/molecules/game/animatedRow";
 import { useGame } from "@/gameLogic/useGame";
 import { useHaptics } from "@/gameLogic/useHaptics";
 import { useSounds } from "@/gameLogic/useSounds";
-import { getRandomWords } from "@/localDb/pushToSqlLite";
+import { getRandomWords, incrementWordShownCount } from "@/localDb/pushToSqlLite";
 import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 
 const GameScreen = () => {
   const navigate = useRouter();
+  const { mode = "infinite" } = useLocalSearchParams<{ mode?: string }>();
 
-  const words = React.useMemo(() => getRandomWords(3), []);
+  const words = React.useMemo(() => {
+    const fetchedWords = getRandomWords(3);
+    // Increment noOfTimesShown for the initial words
+    fetchedWords.forEach((word) => {
+      if (word._id) {
+        incrementWordShownCount(word._id);
+      }
+    });
+    return fetchedWords;
+  }, []);
 
   const { state, addLetter, backspace, submit } = useGame({
     words,
     maxFails: 3,
+    mode,
   });
 
   const { loadGameSounds, playSuccess, playWarning, playKeyPress } =
@@ -96,7 +107,7 @@ const GameScreen = () => {
           ))}
         </View>
 
-        <CustomText>{words[state.curRow]?.hint}</CustomText>
+        <CustomText>{(state.words || words)[state.curRow]?.hint}</CustomText>
 
         <CustomKeyboard
           {...state.keyboardColors}
@@ -117,7 +128,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 24,
     position: "relative",
-    marginTop: 10,
+    marginTop: 40,
   },
   failCountContainer: {
     position: "absolute",
@@ -127,6 +138,7 @@ const styles = StyleSheet.create({
     borderColor: "white",
     borderRadius: 360,
     padding: 4,
+
   },
   rowsContainer: {
     gap: 16,

@@ -1,6 +1,4 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-// import { forceDeauthenticate } from "@/hooks/Auth/forceDeautenticate";
-import * as SecureStore from "expo-secure-store";
 import {
   PaginatedResponse,
   RequestData,

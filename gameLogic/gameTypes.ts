@@ -5,9 +5,12 @@ export type WordItem = {
   hint: string;
 };
 
+export type GameMode = "infinite" | "classic" | string;
+
 export type GameConfig = {
   words: WordItem[];
   maxFails: number;
+  mode: GameMode;
 };
 
 export type KeyboardColors = {
@@ -36,6 +39,7 @@ export type GameState = {
   isWin: boolean;
   isLose: boolean;
   keyboardColors: KeyboardColors;
+  words: WordItem[];
 
   // 👇 ADD THESE
   rowAnimation: RowAnimation;

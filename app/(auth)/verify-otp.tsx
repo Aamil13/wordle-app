@@ -74,11 +74,15 @@ export default function VerifyOtpScreen() {
       otp: formData.otp,
     };
 
-    await verifyAndRegister(payload, {
-      onSuccess: () => {
-        router.replace("/main");
-      },
-    });
+    try {
+      await verifyAndRegister(payload, {
+        onSuccess: () => {
+          router.replace("/main");
+        },
+      });
+    } catch {
+      // Error is already handled by the onError callback in useVerifyAndRegisterOtp
+    }
   };
   return (
     <SafeAreaWrapper>

@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
-import * as SplashScreen from "expo-splash-screen";
-import { useFonts } from "expo-font";
-import { QueryClient } from "@tanstack/react-query";
 import { initDatabase } from "@/localDb/pushToSqlLite";
-import { firstTime } from "@/storage/onboardStorage";
-import AppProviders from "@/providers/AppProvider";
 import AppNavigator from "@/navigation/AppNavigator";
+import AppProviders from "@/providers/AppProvider";
+import { firstTime } from "@/storage/onboardStorage";
 import { useTheme } from "@/utils/useTheme";
 import { Toasts } from "@backpackapp-io/react-native-toast";
+import { QueryClient } from "@tanstack/react-query";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
+import React, { useEffect, useState } from "react";
 
 SplashScreen.preventAutoHideAsync();
 

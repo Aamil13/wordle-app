@@ -1,14 +1,26 @@
 import { CustomText } from "@/components/atoms/customText";
-import { StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 const detailsData = ["Played", "Wins", "Winning Streak"];
-const SessionDetails = () => {
+const SessionDetails = ({ stats, isPending }: { stats?: unknown; isPending: boolean }) => {
+  const statsData = stats as { stats?: { gamesPlayed: number; gamesWon: number; currentStreak: number } } | undefined;
+  
+  if (isPending) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="small" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {detailsData.map((item) => (
+      {detailsData.map((item, index) => (
         <View style={styles.block} key={item}>
           <CustomText>{item}</CustomText>
-          <CustomText>1</CustomText>
+          <CustomText>
+            {index === 0 ? statsData?.stats?.gamesPlayed ?? 0 : index === 1 ? statsData?.stats?.gamesWon ?? 0 : statsData?.stats?.currentStreak ?? 0}
+          </CustomText>
         </View>
       ))}
     </View>

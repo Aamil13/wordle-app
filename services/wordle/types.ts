@@ -22,3 +22,8 @@ export interface WordsApiResponse {
   results: number;
   success: boolean;
 }
+
+export interface RandomWordResponse {
+  data: IWordles;
+  success: boolean;
+}

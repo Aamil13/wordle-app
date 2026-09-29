@@ -32,6 +32,7 @@ export const initDatabase = () => {
         bgEnabled INTEGER NOT NULL DEFAULT 1,
         hapticsEnabled INTEGER NOT NULL DEFAULT 1,
         keyboardSoundEnabled INTEGER NOT NULL DEFAULT 1,
+        keyboardSoundOnPressEnabled INTEGER NOT NULL DEFAULT 1,
         theme TEXT NOT NULL DEFAULT 'dark',
         volume REAL NOT NULL DEFAULT 0.5
       );
@@ -41,6 +42,13 @@ export const initDatabase = () => {
         streak INTEGER NOT NULL DEFAULT 0,
         bestStreak INTEGER NOT NULL DEFAULT 0,
         lastPlayedDate TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS pending_played_updates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        mongo_id TEXT NOT NULL,
+        data TEXT NOT NULL,
+        created_at TEXT NOT NULL
       );
     `);
 
@@ -485,5 +493,103 @@ export const incrementWordShownCount = (mongoId: string): void => {
     );
   } catch (error) {
     console.error("Error incrementing word shown count:", error);
+  }
+};
+
+// =========================
+// PENDING PLAYED UPDATES
+// =========================
+
+export interface PendingPlayedUpdate {
+  id: number;
+  mongo_id: string;
+  data: string;
+  created_at: string;
+}
+
+export const savePendingPlayedUpdate = (
+  mongoId: string,
+  data: Partial<IWordles>,
+): void => {
+  try {
+    db.runSync(
+      `
+      INSERT INTO pending_played_updates (mongo_id, data, created_at)
+      VALUES (?, ?, ?)
+      `,
+      [mongoId, JSON.stringify(data), new Date().toISOString()],
+    );
+    console.log("Saved pending played update for mongo_id:", mongoId);
+  } catch (error) {
+    console.error("Error saving pending played update:", error);
+  }
+};
+
+export const getPendingPlayedUpdates = (): PendingPlayedUpdate[] => {
+  try {
+    const result = db.getAllSync<PendingPlayedUpdate>(
+      `
+      SELECT id, mongo_id, data, created_at
+      FROM pending_played_updates
+      ORDER BY created_at ASC
+      `,
+    );
+    return result;
+  } catch (error) {
+    console.error("Error getting pending played updates:", error);
+    return [];
+  }
+};
+
+export const deletePendingPlayedUpdate = (id: number): void => {
+  try {
+    db.runSync("DELETE FROM pending_played_updates WHERE id = ?", [id]);
+    console.log("Deleted pending played update id:", id);
+  } catch (error) {
+    console.error("Error deleting pending played update:", error);
+  }
+};
+
+export const clearPendingPlayedUpdates = (): void => {
+  try {
+    db.runSync("DELETE FROM pending_played_updates");
+    console.log("Cleared all pending played updates");
+  } catch (error) {
+    console.error("Error clearing pending played updates:", error);
+  }
+};
+
+// =========================
+// SYNC PENDING PLAYED UPDATES
+// =========================
+
+export const syncPendingPlayedUpdates = async (
+  updateApi: (id: string, data: Partial<IWordles>) => Promise<any>,
+): Promise<void> => {
+  try {
+    const pendingUpdates = getPendingPlayedUpdates();
+
+    if (pendingUpdates.length === 0) {
+      console.log("No pending played updates to sync");
+      return;
+    }
+
+    console.log(`Syncing ${pendingUpdates.length} pending played updates`);
+
+    for (const update of pendingUpdates) {
+      try {
+        const parsedData = JSON.parse(update.data) as Partial<IWordles>;
+        await updateApi(update.mongo_id, parsedData);
+        deletePendingPlayedUpdate(update.id);
+        console.log(`Synced played update for mongo_id: ${update.mongo_id}`);
+      } catch (error) {
+        console.error(
+          `Failed to sync played update for mongo_id: ${update.mongo_id}`,
+          error,
+        );
+      }
+    }
+  } catch (error) {
+    console.error("Error syncing pending played updates:", error);
   }
 };

@@ -40,15 +40,17 @@ const Main = () => {
   const { showError } = useCustomToast();
   const wordleDataCount = getTotalWordCount();
   const [isToken, setIsToken] = useState(false);
+  
   const { data, isFetching } = useGetUserData(isToken);
   const { data: wordsData } = useGetAllWords(wordleDataCount < 1) as { data: WordsApiResponse | undefined };
 
   // Zustand selectors
   const bgEnabled = useAppStore((s) => s.bgEnabled);
   const isHydrated = useAppStore((s) => s.isHydrated);
-  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  // const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const clearAuth = useAppStore((s) => s.clearAuth);
   const setAuth = useAppStore((s) => s.setAuth);
+
 
   /* -------------------- Handlers -------------------- */
 
@@ -78,7 +80,7 @@ const Main = () => {
       loadSettingsFromDb();
 
       const token = await getUserToken();
-      if (token) {
+      if (token && token.length > 0 ) {
         setIsToken(true);
       }
     };
@@ -133,24 +135,27 @@ const Main = () => {
               onPress={() => handlePlay("daily")}
               initialRotation={-10}
               variant="primary"
-              isDisable={wordleDataCount < 1}
+              warningType="err"
+              message={ !isToken ? "Please sign in to play Daily Challenge" : "You've already played today"}
+              isWarn={data?.data?.user?.dailyPlayedToday || !isToken}
+              // isDisable={data?.data?.user?.dailyPlayedToday}
             />
               <CustomButton
               text="Infinite"
               onPress={() => handlePlay("infinite")}
               initialRotation={-10}
-              variant="primary"
+              variant="default"
               isDisable={wordleDataCount < 1}
             />
-              <CustomButton
+              {/* <CustomButton
               text="TimeAttack"
               onPress={() => handlePlay("timeattack")}
               initialRotation={-10}
               variant="primary"
               isDisable={wordleDataCount < 1}
-            />
+            /> */}
 
-            {!isAuthenticated ? (
+            {!isToken ? (
               <Link href="/login" asChild>
                 <CustomButton
                   text="Sign In"

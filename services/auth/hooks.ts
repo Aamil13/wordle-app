@@ -1,4 +1,9 @@
+import { useCustomToast } from "@/hooks/useCustomToast";
+import { setUserToken } from "@/storage/userTokenStorage";
+import { useAppStore } from "@/store";
+import { getErrorMessage } from "@/utils/errorFormat";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import {
   forgotPasswordApi,
   isUserEmailTakenApi,
@@ -19,14 +24,11 @@ import {
   sendOtp,
   VerifyOtp,
 } from "./types";
-import { useCustomToast } from "@/hooks/useCustomToast";
-import { getErrorMessage } from "@/utils/errorFormat";
-import { setUserToken } from "@/storage/userTokenStorage";
-import { useAppStore } from "@/store";
 
 export const useLogin = () => {
   const { showPromise } = useCustomToast();
   const store = useAppStore();
+  const router = useRouter();
   return useMutation({
     mutationFn: (data: loginData) =>
       showPromise(login(data), {
@@ -37,6 +39,7 @@ export const useLogin = () => {
     onSuccess(res: any) {
       setUserToken(res.data.token);
       store.setAuth({ user: res.data.user });
+      router.push("/main")
     },
     mutationKey: ["login"],
   });

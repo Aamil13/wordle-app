@@ -39,6 +39,7 @@ export default function RegisterScreen() {
     isPending: isUserEmailTakenPending,
   } = useIsUserEmailTaken();
   const checkUserName = async (userName: string) => {
+    userName = userName.trim();
     if (!userName) return false;
 
     try {
@@ -110,7 +111,11 @@ export default function RegisterScreen() {
             <Controller
               control={control}
               name="userName"
-              rules={validationRules.required("userName")}
+              rules={{
+                ...validationRules.required("userName"),
+                validate: (val: string) =>
+                  !/\s/.test(val.trim()) || "Username must be a single word with no spaces",
+              }}
               render={({
                 field: { onChange, value },
                 fieldState: { error },
@@ -118,7 +123,7 @@ export default function RegisterScreen() {
                 <FloatingInput
                   label="Username"
                   value={value}
-                  onChangeText={onChange}
+                  onChangeText={(text) => onChange(text.replace(/\s/g, ""))}
                   error={error?.message}
                 />
               )}

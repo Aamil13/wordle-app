@@ -18,13 +18,15 @@ const SettingsPanel = ({ onClose }: Props) => {
     toggleHaptics,
     keyboardSoundEnabled,
     togglekeyboardSound,
+    keyboardSoundOnPressEnabled,
+    toggleKeyboardSoundOnPress,
     theme,
     toggleTheme,
   } = useAppStore();
 
   useEffect(() => {
     saveSettingsToDb();
-  }, [theme, bgEnabled, hapticsEnabled, keyboardSoundEnabled]);
+  }, [theme, bgEnabled, hapticsEnabled, keyboardSoundEnabled, keyboardSoundOnPressEnabled]);
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -62,6 +64,13 @@ const SettingsPanel = ({ onClose }: Props) => {
         subtitle="Play sound when typing letters"
         value={keyboardSoundEnabled}
         onToggle={togglekeyboardSound}
+      />
+
+      <SettingRow
+        title="Key Press Sound"
+        subtitle="Play sound when pressing keys"
+        value={keyboardSoundOnPressEnabled}
+        onToggle={toggleKeyboardSoundOnPress}
       />
 
       <SettingRow

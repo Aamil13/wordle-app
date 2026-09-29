@@ -1,10 +1,10 @@
+import { getUserToken } from "@/storage/userTokenStorage";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import {
   PaginatedResponse,
   RequestData,
   ServerResponse,
 } from "./apiClientTypes";
-import { getUserToken } from "@/storage/userTokenStorage";
 
 const CUSTOM_BASE_URL = process.env.EXPO_PUBLIC_CUSTOM_BASE_URL;
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
@@ -126,22 +126,8 @@ async function client<T, U = unknown>(
   };
 
   try {
-    console.log("config", config);
     const response = await api<ServerResponse<T>>(config);
     return response.data;
-    // } catch (err: any) {
-    //   let message =
-    //     err?.response?.data?.message ||
-    //     (err?.response
-    //       ? "Request failed. Please try again."
-    //       : err?.code === "ECONNABORTED"
-    //         ? "Request timed out. Please check your connection."
-    //         : "Something went wrong on our side. Please try again later.");
-
-    //   throw new Error(
-    //     `[API] ${config.method?.toUpperCase()} /${endpoint} — ${message}`,
-    //   );
-    // }
   } catch (err: any) {
     const data = err?.response?.data;
     console.log("err-axiosLevel", data);

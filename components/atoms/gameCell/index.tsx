@@ -19,7 +19,7 @@ interface GameCellInterface extends TextProps {
 }
 
 export const GameCell: React.FC<GameCellInterface> = ({
-  size = 16,
+  size = 14,
   status = "empty",
   style,
   children,
@@ -76,8 +76,8 @@ export const GameCell: React.FC<GameCellInterface> = ({
 
 const styles = StyleSheet.create({
   cell: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",

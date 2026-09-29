@@ -1,12 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import {
   getAllWordsApi,
   getRandomWordApi,
   getWordsByCategoryApi,
   getWordsByDifficultyApi,
+  updatePlayedWordApi,
 } from "./api";
-import { WordDifficulty } from "./types";
+import { IWordles, RandomWordResponse, WordDifficulty } from "./types";
 
 // GET ALL WORDS
 export function useGetAllWords(enabled: boolean = true) {
@@ -19,12 +20,15 @@ export function useGetAllWords(enabled: boolean = true) {
 
 // GET RANDOM WORD
 export function useGetRandomWord(enabled: boolean = true) {
-  return useQuery({
+  return useQuery<RandomWordResponse>({
     queryKey: ["getRandomWord"],
     queryFn: () => getRandomWordApi(),
     enabled,
   });
 }
+
+
+
 
 // GET WORDS BY DIFFICULTY
 export function useGetWordsByDifficulty(
@@ -47,5 +51,13 @@ export function useGetWordsByCategory(
     queryKey: ["getWordsByCategory", category],
     queryFn: () => getWordsByCategoryApi(category),
     enabled: enabled && !!category,
+  });
+}
+
+// UPDATE PLAYED WORD
+export function useUpdatePlayedWord() {
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<IWordles> }) =>
+      updatePlayedWordApi(id, data),
   });
 }

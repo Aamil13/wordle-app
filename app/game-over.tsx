@@ -5,7 +5,7 @@ import { CustomButton } from "@/components/atoms/Button";
 import { CustomText } from "@/components/atoms/customText";
 import SessionDetails from "@/components/molecules/sessionDetails";
 import { useSounds } from "@/gameLogic/useSounds";
-import { useGetStatsByMode } from "@/services/stats/hooks";
+import { useGetStatsByMode, useUpdateInfiniteSession, useUpdateStats } from "@/services/stats/hooks";
 import { GameModeEnum } from "@/services/stats/types";
 import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -18,12 +18,18 @@ const GameOverScreen = () => {
     useSounds();
     
 
-  const { win } = useLocalSearchParams<{
+  const { win, mode = "infinite", guesses,correctGuesses } = useLocalSearchParams<{
     win: string;
+    mode?: string;
+    guesses?: string;
+    correctGuesses?: string;
   }>();
   const isLose = win === "false";
-  const { data: stats, isPending } = useGetStatsByMode(GameModeEnum.DAILY);
-  
+  const gameMode = mode === "daily" ? GameModeEnum.DAILY : GameModeEnum.INFINITE;
+  const { data: stats, isPending } = useGetStatsByMode(gameMode);
+  const updateInfiniteSession = useUpdateInfiniteSession();
+  const updateStats = useUpdateStats();
+
   useEffect(() => {
     loadGameOverSounds();
   }, []);
@@ -33,10 +39,36 @@ const GameOverScreen = () => {
 
     if (win !== "false") {
       playTrumpet();
+      if (mode === "infinite" ) {
+      updateInfiniteSession.mutate({ correctGuesses: correctGuesses ? parseInt(correctGuesses) : 1 });
+    }
+    if (mode === "daily") {
+      updateStats.mutate({
+        gameMode: GameModeEnum.DAILY,
+        result: {
+          won: !isLose,
+          guesses: guesses ? parseInt(guesses) : 1,
+        },
+      });
+    }
     } else {
       playFail();
+      if (mode === "infinite" ) {
+      updateInfiniteSession.mutate({correctGuesses: correctGuesses ? parseInt(correctGuesses) : 1 });
+    }
+    if (mode === "daily") {
+      updateStats.mutate({
+        gameMode: GameModeEnum.DAILY,
+        result: {
+          won: !isLose,
+          guesses: guesses ? parseInt(guesses) : 1,
+        },
+      });
+    }
     }
   }, [isGameOverLoaded]);
+
+
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
@@ -70,7 +102,7 @@ const GameOverScreen = () => {
         <CustomText size={18}>
           {isLose ? "Better Luck Next Time" : "WOW YOU WON!"}
         </CustomText>
-        <SessionDetails  />
+        <SessionDetails stats={stats} isPending={isPending} />
         <CustomButton
           text={"Back to main menu"}
           onPress={() => router.replace("/main")}

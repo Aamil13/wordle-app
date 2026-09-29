@@ -9,6 +9,9 @@ export type SettingsSlice = {
   keyboardSoundEnabled: boolean;
   togglekeyboardSound: () => void;
 
+  keyboardSoundOnPressEnabled: boolean;
+  toggleKeyboardSoundOnPress: () => void;
+
   streak: number;
   bestStreak: number;
 
@@ -41,6 +44,7 @@ export const createSettingsSlice: StateCreator<
   bgEnabled: true,
   hapticsEnabled: true,
   keyboardSoundEnabled: true,
+  keyboardSoundOnPressEnabled: true,
   volume: 0.5,
   theme: "dark",
   streak: 0,
@@ -53,6 +57,11 @@ export const createSettingsSlice: StateCreator<
     set((state) => ({ theme: state.theme === "dark" ? "light" : "dark" })),
   togglekeyboardSound: () =>
     set((state) => ({ keyboardSoundEnabled: !state.keyboardSoundEnabled })),
+
+  toggleKeyboardSoundOnPress: () =>
+    set((state) => ({
+      keyboardSoundOnPressEnabled: !state.keyboardSoundOnPressEnabled,
+    })),
 
   setHapticsEnabled: (value) => set({ hapticsEnabled: value }),
   toggleHaptics: () =>

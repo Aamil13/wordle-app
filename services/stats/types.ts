@@ -18,7 +18,7 @@ export interface UpdateStatsRequest {
 }
 
 export interface InfiniteSessionRequest {
-  sessionLength: number;
+  correctGuesses: number;
 }
 
 export interface BatchUpdateGame {

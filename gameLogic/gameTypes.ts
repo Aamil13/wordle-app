@@ -40,6 +40,7 @@ export type GameState = {
   isLose: boolean;
   keyboardColors: KeyboardColors;
   words: WordItem[];
+  correctGuesses: number;
 
   // 👇 ADD THESE
   rowAnimation: RowAnimation;

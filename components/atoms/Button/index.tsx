@@ -1,4 +1,5 @@
 import { useAudio } from "@/context/audio";
+import { useCustomToast } from "@/hooks/useCustomToast";
 import React from "react";
 import {
   ActivityIndicator,
@@ -31,6 +32,9 @@ interface ButtonProps {
   width?: "auto" | "100%" | "50%";
   isDisable?: boolean;
   isPending?: boolean;
+  warningType?: "warn" | "err";
+  message?: string;
+  isWarn?: boolean;
 }
 
 export const CustomButton: React.FC<ButtonProps> = ({
@@ -46,13 +50,27 @@ export const CustomButton: React.FC<ButtonProps> = ({
   width = "auto",
   isDisable,
   isPending,
+  warningType,
+  message,
+  isWarn,
 }) => {
   const { playButtonSound } = useAudio();
+  const { showError, showInfo } = useCustomToast();
   const scale = useSharedValue(1);
   const rotation = useSharedValue(initialRotation);
 
   const handlePress = () => {
     playButtonSound();
+    
+    if (isWarn && message) {
+      if (warningType === "err") {
+        showError(message);
+      } else {
+        showInfo(message);
+      }
+      return;
+    }
+    
     onPress();
   };
 

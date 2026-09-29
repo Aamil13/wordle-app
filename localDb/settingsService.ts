@@ -7,6 +7,7 @@ type SettingsRow = {
   hapticsEnabled: number;
   volume: number;
   keyboardSoundEnabled: number;
+  keyboardSoundOnPressEnabled: number;
   theme: "dark" | "light";
 };
 
@@ -30,6 +31,7 @@ export const loadSettingsFromDb = async () => {
       bgEnabled: result.bgEnabled === 1,
       hapticsEnabled: result.hapticsEnabled === 1,
       keyboardSoundEnabled: result.keyboardSoundEnabled === 1,
+      keyboardSoundOnPressEnabled: result.keyboardSoundOnPressEnabled === 1,
       theme: result.theme,
       volume: result.volume,
     });
@@ -38,15 +40,16 @@ export const loadSettingsFromDb = async () => {
 };
 
 export const saveSettingsToDb = async () => {
-  const { bgEnabled, hapticsEnabled, volume, keyboardSoundEnabled, theme } =
+  const { bgEnabled, hapticsEnabled, volume, keyboardSoundEnabled, keyboardSoundOnPressEnabled, theme } =
     useAppStore.getState();
 
   await db.runAsync(
-    `UPDATE settings SET bgEnabled=?, hapticsEnabled=?, keyboardSoundEnabled=?, theme=?, volume=? WHERE id=1`,
+    `UPDATE settings SET bgEnabled=?, hapticsEnabled=?, keyboardSoundEnabled=?, keyboardSoundOnPressEnabled=?, theme=?, volume=? WHERE id=1`,
     [
       bgEnabled ? 1 : 0,
       hapticsEnabled ? 1 : 0,
       keyboardSoundEnabled ? 1 : 0,
+      keyboardSoundOnPressEnabled ? 1 : 0,
       theme,
       volume,
     ],

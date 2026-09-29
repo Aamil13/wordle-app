@@ -14,7 +14,9 @@ export const setUserToken = async (value: string) => {
 
 export const getUserToken = async () => {
   try {
+
     const token = await SecureStore.getItemAsync(USER_TOKEN_KEY);
+  
     return token;
   } catch (error) {
     console.error("Error setting user token:", error);

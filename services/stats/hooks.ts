@@ -12,7 +12,7 @@ import {
   BatchUpdateRequest,
   GameMode,
   InfiniteSessionRequest,
-  UpdateStatsRequest,
+  UpdateStatsRequest
 } from "./types";
 
 // UPDATE STATS

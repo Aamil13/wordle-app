@@ -1,13 +1,14 @@
 import { client } from "../apiClient";
 import {
-    BatchUpdateRequest,
-    GameMode,
-    InfiniteSessionRequest,
-    UpdateStatsRequest
+  BatchUpdateRequest,
+  GameMode,
+  InfiniteSessionRequest,
+  UpdateStatsRequest
 } from "./types";
 
 // UPDATE STATS
 export async function updateStatsApi(data: UpdateStatsRequest) {
+
   const res = await client("/stats/update", {
     method: "POST",
     data: data,

@@ -24,7 +24,7 @@ export const GetOnboardingData = (isDark: boolean) => {
   return [
     {
       id: 1,
-      animation: require("../assets/onboarding/W.json"),
+      animation: require("../assets/onboarding/w.json"),
       text: "Welcome to Wordle",
       textColor: colors.primary,
       bgColor: colors.bg,
@@ -33,7 +33,7 @@ export const GetOnboardingData = (isDark: boolean) => {
     },
     {
       id: 2,
-      animation: require("../assets/onboarding/SquareBox.json"),
+      animation: require("../assets/onboarding/squarebox.json"),
       text: "Build Your Vocabulary",
       textColor: colors.text,
       bgColor: colors.secondary,
@@ -42,7 +42,7 @@ export const GetOnboardingData = (isDark: boolean) => {
     },
     {
       id: 3,
-      animation: require("../assets/onboarding/PartyDance.json"),
+      animation: require("../assets/onboarding/partydance.json"),
       text: "Celebrate Your Wins!",
       textColor: colors.text,
       bgColor: colors.tertiary,

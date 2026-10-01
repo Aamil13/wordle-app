@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.wordle"
+      "bundleIdentifier": "com.kaosintent.store.wordle"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +21,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.wordle"
+      "package": "com.kaosintent.store.wordle"
     },
     "web": {
       "output": "static",

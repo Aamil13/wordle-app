@@ -119,7 +119,7 @@ const Main = () => {
         <View style={styles.container}>
           <View style={styles.header}>
             <LottieView
-              source={require("../assets/onboarding/W.json")}
+              source={require("../assets/onboarding/w.json")}
               style={styles.lottie}
               progress={100}
             />

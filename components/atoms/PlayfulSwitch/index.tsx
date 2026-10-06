@@ -1,29 +1,36 @@
-import React, { useEffect, useRef } from "react";
-import { Pressable, StyleSheet, Animated } from "react-native";
-import * as Haptics from "expo-haptics";
 import { Colors } from "@/constants/Colors";
+import { useAppStore } from "@/store";
+import * as Haptics from "expo-haptics";
+import React, { useEffect, useRef } from "react";
+import { Animated, Pressable } from "react-native";
 
 type Props = {
   value: boolean;
   onValueChange: (value: boolean) => void;
   disabled?: boolean;
   enableHaptics?: boolean;
-  theme: "dark" | "light";
+  size?: "small" | "medium" | "large";
 };
 
-const WIDTH = 64;
-const HEIGHT = 36;
-const KNOB = 30;
+const SIZES = {
+  small: { width: 48, height: 28, knob: 22 },
+  medium: { width: 64, height: 36, knob: 30 },
+  large: { width: 80, height: 44, knob: 36 },
+};
+
 const PADDING = 3;
 
 export default function PlayfulSwitch({
   value,
   onValueChange,
-  theme = "dark",
+  size = "medium",
   disabled = false,
   enableHaptics = false,
 }: Props) {
+  const theme = useAppStore((state) => state.theme);
   const progress = useRef(new Animated.Value(value ? 1 : 0)).current;
+
+  const { width: WIDTH, height: HEIGHT, knob: KNOB } = SIZES[size];
 
   const activeColor = Colors[theme].switchActive;
   const inactiveColor = Colors[theme].switchInactive;
@@ -67,8 +74,11 @@ export default function PlayfulSwitch({
     <Pressable onPress={handleToggle} disabled={disabled}>
       <Animated.View
         style={[
-          styles.track,
           {
+            width: WIDTH,
+            height: HEIGHT,
+            borderRadius: HEIGHT / 2,
+            justifyContent: "center",
             backgroundColor,
             opacity: disabled ? 0.5 : 1,
           },
@@ -76,9 +86,18 @@ export default function PlayfulSwitch({
       >
         <Animated.View
           style={[
-            styles.knob,
             {
+              width: KNOB,
+              height: KNOB,
+              borderRadius: KNOB / 2,
               backgroundColor: knobColor,
+              alignItems: "center",
+              justifyContent: "center",
+              shadowColor: "#000",
+              shadowOpacity: 0.2,
+              shadowRadius: 5,
+              shadowOffset: { width: 0, height: 3 },
+              elevation: 4,
               transform: [{ translateX }, { scale }],
             },
           ]}
@@ -89,29 +108,3 @@ export default function PlayfulSwitch({
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  track: {
-    width: WIDTH,
-    height: HEIGHT,
-    borderRadius: HEIGHT / 2,
-    justifyContent: "center",
-  },
-  knob: {
-    width: KNOB,
-    height: KNOB,
-    borderRadius: KNOB / 2,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 4,
-  },
-  face: {
-    fontSize: 16,
-  },
-});

@@ -18,4 +18,8 @@ export const validationRules = {
   required: (fieldName: string = "This field") => ({
     required: `${fieldName} is required`,
   }),
+
+  acceptTerms: {
+    validate: (value: boolean) => value === true || "You must accept the terms to continue",
+  },
 };

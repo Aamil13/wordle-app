@@ -1,24 +1,26 @@
-import { View, StyleSheet } from "react-native";
-import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "expo-router";
+import { Controller, useForm } from "react-hook-form";
+import { StyleSheet, View } from "react-native";
 
-import FloatingInput from "@/components/atoms/FloatingInput";
 import { CustomButton } from "@/components/atoms/Button";
-import AuthContainer from "@/components/molecules/auth/authContainer";
-import AuthAnimation from "@/components/molecules/auth/authAnimation";
-import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
-import KeyboardScreenWrapper from "@/components/molecules/KeyboardScreenWrapper";
 import { CustomText } from "@/components/atoms/customText";
+import FloatingInput from "@/components/atoms/FloatingInput";
+import PlayfulSwitch from "@/components/atoms/PlayfulSwitch";
+import AuthAnimation from "@/components/molecules/auth/authAnimation";
+import AuthContainer from "@/components/molecules/auth/authContainer";
+import KeyboardScreenWrapper from "@/components/molecules/KeyboardScreenWrapper";
+import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
 import { useTheme } from "@/utils/useTheme";
 
 import register from "@/assets/auth/register.json";
-import { validationRules } from "@/utils/validationRules";
 import { useIsUserEmailTaken, useIsUserNameTaken } from "@/services/auth/hooks";
+import { validationRules } from "@/utils/validationRules";
 
 type RegisterFormData = {
   userName: string;
   email: string;
   password: string;
+  acceptTerms: boolean;
 };
 
 export default function RegisterScreen() {
@@ -31,7 +33,25 @@ export default function RegisterScreen() {
     setError,
     clearErrors,
     formState: { errors },
-  } = useForm<RegisterFormData>();
+  } = useForm<RegisterFormData>({
+    defaultValues: {
+      acceptTerms: false,
+    },
+  });
+
+  const openTermsOfService = () => {
+    router.push({
+      pathname: "/legal-document" as any,
+      params: { type: "terms" },
+    });
+  };
+
+  const openPrivacyPolicy = () => {
+    router.push({
+      pathname: "/legal-document" as any,
+      params: { type: "privacy" },
+    });
+  };
 
   const { mutateAsync, isPending } = useIsUserNameTaken();
   const {
@@ -97,6 +117,7 @@ export default function RegisterScreen() {
         username: data.userName,
         password: data.password,
         email: data.email,
+        termsAccepted: data.acceptTerms.toString(),
       },
     });
   };
@@ -166,13 +187,59 @@ export default function RegisterScreen() {
               )}
             />
 
+            <Controller
+              control={control}
+              name="acceptTerms"
+              rules={validationRules.acceptTerms}
+              render={({ field: { onChange, value }, fieldState: { error } }) => (
+                <View style={styles.termsContainer}>
+                  <PlayfulSwitch
+                    value={value}
+                    onValueChange={onChange}
+                    size="small"
+                  />
+                  <View style={styles.termsTextContainer}>
+                    <View style={styles.termsTextWrapper}>
+                      <CustomText size={12}>
+                        I agree to the{" "}
+                      </CustomText>
+                      <CustomText
+                        style={styles.linkText}
+                        color={theme.yellow}
+                        onPress={openTermsOfService}
+                        size={12}
+                      >
+                        Terms of Service
+                      </CustomText>
+                      <CustomText size={12}>
+                        {" "}and{" "}
+                      </CustomText>
+                      <CustomText
+                        style={styles.linkText}
+                        color={theme.yellow}
+                        onPress={openPrivacyPolicy}
+                        size={12}
+                      >
+                        Privacy Policy
+                      </CustomText>
+                    </View>
+                    {error && (
+                      <CustomText style={styles.errorText} size={10} color="red">
+                        {error.message}
+                      </CustomText>
+                    )}
+                  </View>
+                </View>
+              )}
+            />
+
             <CustomButton
               text="Create Account"
               onPress={handleSubmit(onSubmit)}
               variant="primary"
               width="100%"
               size="large"
-              isDisable={!!errors.userName || isPending}
+              isDisable={!!errors.userName || !!errors.acceptTerms || !!errors.email || isPending}
             />
 
             <CustomText fontFamily="IoSevca" style={{ textAlign: "center" }}>
@@ -197,5 +264,28 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     gap: 18,
+  },
+  termsContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    justifyContent: "center",
+  },
+  termsTextContainer: {
+    flex: 1,
+  },
+  termsTextWrapper: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  termsText: {
+    flex: 1,
+    flexWrap: "wrap",
+  },
+  linkText: {
+    textDecorationLine: "underline",
+  },
+  errorText: {
+    marginTop: 4,
   },
 });

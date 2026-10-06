@@ -34,7 +34,6 @@ const SettingRow = ({
         value={value}
         onValueChange={onToggle}
         enableHaptics={hapticsEnabled}
-        theme={theme}
       />
     </View>
   );

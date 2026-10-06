@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "wordle",
-    "slug": "wordle",
+    "name": "Guess the Word",
+    "slug": "guess-the-word",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "wordle",
+    "scheme": "guess-the-word",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kaosintent.store.wordle"
+      "bundleIdentifier": "com.kaosintent.store.guesstheword"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +21,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.kaosintent.store.wordle"
+      "package": "com.kaosintent.store.guesstheword"
     },
     "web": {
       "output": "static",

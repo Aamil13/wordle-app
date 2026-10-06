@@ -1,5 +1,7 @@
-import { getUserToken } from "@/storage/userTokenStorage";
+import { deleteUserToken, getUserToken } from "@/storage/userTokenStorage";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import * as Constants from "expo-constants";
+import { Platform } from "react-native";
 import {
   PaginatedResponse,
   RequestData,
@@ -9,9 +11,12 @@ import {
 const CUSTOM_BASE_URL = process.env.EXPO_PUBLIC_CUSTOM_BASE_URL;
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Force Deauthenticate ───────────────────────────────────────────────────────
 
-const JWT_ERROR_MESSAGES = new Set(["jwt expired", "jwt malformed"]);
+export async function forceDeauthenticate() {
+  await deleteUserToken();
+  return Promise.reject({ message: "Authentication expired", isAuthError: true });
+}
 
 // ─── Axios Instance ────────────────────────────────────────────────────────────
 
@@ -38,10 +43,12 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
-  (error) => {
-    const message: string | undefined = error.response?.data?.message;
-    if (message && JWT_ERROR_MESSAGES.has(message)) {
-      // return forceDeauthenticate();
+  async (error) => {
+    if (
+      error.response?.data?.message === "jwt expired" ||
+      error.response?.data?.message === "jwt malformed"
+    ) {
+      return forceDeauthenticate();
     }
     return Promise.reject(error);
   },
@@ -119,7 +126,11 @@ async function client<T, U = unknown>(
     url: buildUrl(endpoint, customBaseUrl),
     method: method ?? (data ? "POST" : "GET"),
     data: data !== undefined ? JSON.stringify(data) : undefined,
-    headers: { ...headers },
+    headers: {
+      ...headers,
+      "x-platform": Platform.OS,
+      "x-app-version": Constants.default?.expoConfig?.version ?? "1.0.0",
+    },
     params: { id, page, size, userCode, email },
     transformResponse: buildTransformResponse<T>(transform),
     ...rest,

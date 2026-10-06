@@ -6,6 +6,7 @@ import SettingsPanel from "@/components/organisms/settingsPanel";
 import { useAudio } from "@/context/audio";
 import { useNetwork } from "@/context/network";
 import { useCustomToast } from "@/hooks/useCustomToast";
+import { useForceUpdate } from "@/hooks/useForceUpdate";
 import { getTotalWordCount, saveWordsToDatabase } from "@/localDb/pushToSqlLite";
 import { loadSettingsFromDb } from "@/localDb/settingsService";
 import { useGetUserData } from "@/services/user/hooks";
@@ -40,9 +41,10 @@ const Main = () => {
   const { showError } = useCustomToast();
   const wordleDataCount = getTotalWordCount();
   const [isToken, setIsToken] = useState(false);
-  
+
   const { data, isFetching } = useGetUserData(isToken);
   const { data: wordsData } = useGetAllWords(wordleDataCount < 1) as { data: WordsApiResponse | undefined };
+  const { shouldUpdate } = useForceUpdate();
 
   // Zustand selectors
   const bgEnabled = useAppStore((s) => s.bgEnabled);
@@ -112,6 +114,13 @@ const Main = () => {
       saveWordsToDatabase(wordsData.data);
     }
   }, [wordsData]);
+
+  // Navigate to force update screen if needed
+  useEffect(() => {
+    if (shouldUpdate) {
+      router.push("/force-update");
+    }
+  }, [shouldUpdate, router]);
 
   return (
     <>

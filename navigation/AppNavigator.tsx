@@ -1,5 +1,5 @@
-import { Stack, router } from "expo-router";
 import { getRootHeaderOptions } from "@/utils/rootHeaderOptions";
+import { Stack, router } from "expo-router";
 
 type Props = {
   needsOnboarding: boolean;
@@ -82,6 +82,20 @@ export default function AppNavigator({
           backgroundColor: headerBgColor,
           title: "main",
         })}
+      />
+       <Stack.Screen
+        name="legal-document"
+        options={getRootHeaderOptions({
+          router,
+          headerTextColor,
+          backgroundColor: headerBgColor,
+          title: "register",
+        })}
+      />
+
+      <Stack.Screen
+        name="force-update"
+        options={{ headerShown: false }}
       />
     </Stack>
   );

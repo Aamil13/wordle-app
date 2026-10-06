@@ -63,6 +63,13 @@ export const initDatabase = () => {
       `);
     } catch {}
 
+    try {
+      db.execSync(`
+        ALTER TABLE settings
+        ADD COLUMN keyboardSoundOnPressEnabled INTEGER NOT NULL DEFAULT 1;
+      `);
+    } catch {}
+
     // =========================
     // WORDS MIGRATIONS
     // =========================

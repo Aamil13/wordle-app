@@ -1,27 +1,28 @@
-import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { CustomButton } from "@/components/atoms/Button";
-import AuthContainer from "@/components/molecules/auth/authContainer";
-import AuthAnimation from "@/components/molecules/auth/authAnimation";
-import { OtpInput } from "react-native-otp-entry";
-import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
-import KeyboardScreenWrapper from "@/components/molecules/KeyboardScreenWrapper";
-import { CustomText } from "@/components/atoms/customText";
-import { useTheme } from "@/utils/useTheme";
 import OtpAnimation from "@/assets/auth/OTPVerification.json";
+import { CustomButton } from "@/components/atoms/Button";
+import { CustomText } from "@/components/atoms/customText";
+import FormError from "@/components/atoms/FormError";
+import AuthAnimation from "@/components/molecules/auth/authAnimation";
+import AuthContainer from "@/components/molecules/auth/authContainer";
+import KeyboardScreenWrapper from "@/components/molecules/KeyboardScreenWrapper";
+import { useResendTimer } from "@/hooks/useResendTimer";
 import {
   useResendOtp,
   useSendOtp,
   useVerifyAndRegisterOtp,
 } from "@/services/auth/hooks";
 import { getSafeParam } from "@/utils/getSafeParam";
-import { useResendTimer } from "@/hooks/useResendTimer";
+import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
+import { useTheme } from "@/utils/useTheme";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
-import FormError from "@/components/atoms/FormError";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { OtpInput } from "react-native-otp-entry";
 
 export default function VerifyOtpScreen() {
   const router = useRouter();
   const theme = useTheme();
+  
   const {
     control,
     handleSubmit,
@@ -33,6 +34,7 @@ export default function VerifyOtpScreen() {
   });
   const { mutate, submittedAt, isPending: isSendOtpPending } = useSendOtp();
   const { mutate: resendOtp } = useResendOtp();
+
   const {
     mutateAsync: verifyAndRegister,
     isPending,
@@ -89,7 +91,7 @@ export default function VerifyOtpScreen() {
       <KeyboardScreenWrapper>
         <AuthContainer>
           <View style={styles.container}>
-            <View>
+            <View style={styles.otpContainer}>
               <AuthAnimation
                 height={400}
                 source={OtpAnimation}
@@ -100,6 +102,13 @@ export default function VerifyOtpScreen() {
                 textProps={{ style: { color: theme.text } }}
                 onFilled={(code) => (otp = code)}
               />*/}
+              {
+                submittedAt !== 0 || !isSendOtpPending && (
+                  <CustomText align="left" color={theme.text} size={12}>
+                    *Click on send button to send the OTP
+                  </CustomText>
+                )
+              }
               <Controller
                 control={control}
                 name="otp"
@@ -115,6 +124,7 @@ export default function VerifyOtpScreen() {
                     numberOfDigits={6}
                     textProps={{ style: { color: theme.text } }}
                     onFilled={(code) => onChange(code)}
+                    disabled={submittedAt !== 0 || !isSendOtpPending }
                   />
                 )}
               />
@@ -126,13 +136,12 @@ export default function VerifyOtpScreen() {
                   disabled={isActive}
                 >
                   <CustomText fontFamily="IoSevca">
-                    {" "}
                     {isActive ? `Resend in ${secondsLeft}s` : "Resend Code"}
                   </CustomText>
                 </TouchableOpacity>
               )}
             </View>
-            {submittedAt == 0 ? (
+            {submittedAt == 0 || isSendOtpPending ? (
               <CustomButton
                 text="Send OTP"
                 variant="primary"
@@ -165,6 +174,10 @@ const styles = StyleSheet.create({
     gap: 22,
     alignItems: "center",
     display: "flex",
+  },
+  otpContainer: {
+    display: "flex",
+    gap: 8,
   },
   forgotPasswordContainer: {
     display: "flex",

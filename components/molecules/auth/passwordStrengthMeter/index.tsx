@@ -1,7 +1,7 @@
 import { CustomText } from "@/components/atoms/customText";
 import { Colors } from "@/constants/Colors";
 import { useAppStore } from "@/store";
-import { View, StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 export default function PasswordStrength({ password }: { password: string }) {
   const colorScheme = useAppStore((state) => state.theme);
@@ -48,7 +48,7 @@ export default function PasswordStrength({ password }: { password: string }) {
       </View>
 
       {/* Strength Label */}
-      <CustomText size={12} style={styles.label}>
+      <CustomText size={12} style={styles.label} align="left">
         Strength: {getStrengthLabel()}
       </CustomText>
 
@@ -58,6 +58,7 @@ export default function PasswordStrength({ password }: { password: string }) {
           fontFamily="IoSevca"
           size={14}
           color={checks.length ? colors.green : colors.text}
+          align="left"
         >
           • At least 8 characters
         </CustomText>
@@ -65,6 +66,7 @@ export default function PasswordStrength({ password }: { password: string }) {
           fontFamily="IoSevca"
           size={14}
           color={checks.uppercase ? colors.green : colors.text}
+          align="left"
         >
           • One uppercase letter
         </CustomText>
@@ -72,6 +74,7 @@ export default function PasswordStrength({ password }: { password: string }) {
           fontFamily="IoSevca"
           size={14}
           color={checks.number ? colors.green : colors.text}
+          align="left"
         >
           • One number
         </CustomText>
@@ -79,6 +82,7 @@ export default function PasswordStrength({ password }: { password: string }) {
           fontFamily="IoSevca"
           size={14}
           color={checks.special ? colors.green : colors.text}
+          align="left"
         >
           • One special character
         </CustomText>

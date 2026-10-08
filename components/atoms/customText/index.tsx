@@ -8,6 +8,7 @@ interface CustomTextProps extends TextProps {
   color?: string; // Font color
   style?: StyleProp<TextStyle>;
   fontFamily?: "jumpsWinter" | "IoSevca";
+  align?: "center" | "left" | "right"
 }
 
 export const CustomText: React.FC<CustomTextProps> = ({
@@ -15,6 +16,7 @@ export const CustomText: React.FC<CustomTextProps> = ({
   size = 16, // default font size
   color, // default font color
   style,
+  align = "center",
   children,
   ...props
 }) => {
@@ -28,7 +30,7 @@ export const CustomText: React.FC<CustomTextProps> = ({
   return (
     <RNText
       {...props}
-      style={[{ fontFamily: fontFamily, fontSize: size, color }, style]}
+      style={[{ fontFamily: fontFamily, fontSize: size, color,flexWrap:"wrap",width:"auto",height:"auto",textAlign: align }, style]}
     >
       {children}
     </RNText>

@@ -1,7 +1,7 @@
-import { queryClient } from "@/app/_layout";
 import NetworkBanner from "@/components/molecules/networkBanner";
 import { AudioProvider } from "@/context/audio";
 import { NetworkProvider } from "@/context/network";
+import { queryClient } from "@/lib/queryClient";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode } from "react";

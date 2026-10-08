@@ -1,11 +1,12 @@
 import { Colors } from "@/constants/Colors";
 import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
 import { Stack } from "expo-router";
-import { ActivityIndicator, useColorScheme, View } from "react-native";
+import { ActivityIndicator, Text, useColorScheme, View } from "react-native";
 
 export default function NotFound() {
   const colorScheme = useColorScheme();
-  const spinnerColor = Colors[colorScheme || "dark"].spinner;
+  const colors = Colors[colorScheme || "dark"];
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -17,7 +18,17 @@ export default function NotFound() {
             alignItems: "center",
           }}
         >
-          <ActivityIndicator color={spinnerColor} size="large" />
+          <ActivityIndicator color={colors.spinner} size="large" />
+          <Text
+            style={{
+              color: colors.text,
+              marginTop: 12,
+              fontFamily: "IoSevca",
+              fontSize: 16,
+            }}
+          >
+            Page does not exist
+          </Text>
         </View>
       </SafeAreaWrapper>
     </>

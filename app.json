@@ -49,7 +49,15 @@
           ]
         }
       ],
-      "expo-font",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/JumpsWinter.otf",
+            "./assets/fonts/IosevkaCharonMono-Regular.ttf"
+          ]
+        }
+      ],
       "expo-sqlite"
     ],
     "experiments": {
@@ -59,7 +67,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "60c156a1-036b-4027-96d6-c3073308f382"
+        "projectId": "67d28393-5a69-46e5-b7f3-5afb12dcb00d"
       }
     }
   }

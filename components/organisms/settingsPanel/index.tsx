@@ -1,10 +1,10 @@
-import React, { useEffect } from "react";
-import { View, StyleSheet, Pressable } from "react-native";
 import { CustomText } from "@/components/atoms/customText";
-import { Ionicons } from "@expo/vector-icons";
 import SettingRow from "@/components/molecules/settingsRow";
-import { useAppStore } from "@/store";
 import { saveSettingsToDb } from "@/localDb/settingsService";
+import { useAppStore } from "@/store";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 
 type Props = {
   onClose: () => void;
@@ -22,11 +22,13 @@ const SettingsPanel = ({ onClose }: Props) => {
     toggleKeyboardSoundOnPress,
     theme,
     toggleTheme,
+    showOnboarding,
+    toggleShowOnboarding,
   } = useAppStore();
 
   useEffect(() => {
     saveSettingsToDb();
-  }, [theme, bgEnabled, hapticsEnabled, keyboardSoundEnabled, keyboardSoundOnPressEnabled]);
+  }, [theme, bgEnabled, hapticsEnabled, keyboardSoundEnabled, keyboardSoundOnPressEnabled, showOnboarding]);
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -56,7 +58,7 @@ const SettingsPanel = ({ onClose }: Props) => {
         title="Haptics"
         subtitle="Vibration feedback for interactions"
         value={hapticsEnabled}
-        onToggle={() => toggleHaptics}
+        onToggle={() => toggleHaptics()}
       />
 
       <SettingRow
@@ -78,6 +80,13 @@ const SettingsPanel = ({ onClose }: Props) => {
         subtitle="Switch between light and dark theme"
         value={theme === "dark"}
         onToggle={toggleTheme}
+      />
+
+      <SettingRow
+        title="Show Intro on Start"
+        subtitle="Show the onboarding screen when the app opens"
+        value={showOnboarding}
+        onToggle={toggleShowOnboarding}
         noBorder
       />
     </View>

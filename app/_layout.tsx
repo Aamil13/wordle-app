@@ -1,17 +1,13 @@
 import { initDatabase } from "@/localDb/pushToSqlLite";
 import AppNavigator from "@/navigation/AppNavigator";
 import AppProviders from "@/providers/AppProvider";
-import { firstTime } from "@/storage/onboardStorage";
 import { useTheme } from "@/utils/useTheme";
 import { Toasts } from "@backpackapp-io/react-native-toast";
-import { QueryClient } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
 SplashScreen.preventAutoHideAsync();
-
-export const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const color = useTheme();
@@ -19,44 +15,48 @@ export default function RootLayout() {
   const headerTextColor = color.text;
   const headerBgColor = color.background;
 
-  const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null);
-
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     jumpsWinter: require("../assets/fonts/JumpsWinter.otf"),
     IoSevca: require("../assets/fonts/IosevkaCharonMono-Regular.ttf"),
   });
 
+  // Log font loading errors
+  useEffect(() => {
+    if (fontError) {
+      console.error("Font loading error:", fontError);
+    }
+  }, [fontError]);
+
   /**
-   * App initialization
+   * App initialization — DB only, no onboarding check here.
+   * Onboarding routing is handled by app/index.tsx.
    */
   useEffect(() => {
-    initApp();
+    initDatabase();
   }, []);
 
-  const initApp = async () => {
-    try {
-      initDatabase();
-      const isFirstTime = await firstTime();
-      setNeedsOnboarding(!!isFirstTime);
-    } catch (error) {
-      console.log("App init error:", error);
-      setNeedsOnboarding(false);
-    }
-  };
-
   /**
-   * Hide splash when fonts load
+   * Hide splash when fonts are loaded (or errored)
    */
   useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync();
-  }, [fontsLoaded]);
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded || needsOnboarding === null) return null;
+  // Don't render the navigator until fonts are ready.
+  // Without this guard, screens that are navigated to directly (e.g. /main
+  // for returning users) mount and commit their layout before the custom font
+  // is available. The button/text sizes are then calculated against the system
+  // fallback font and don't reflow when jumpsWinter loads — causing cut-off or
+  // multi-line text. The SplashScreen hides this blank state from the user.
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
 
   return (
     <AppProviders headerBgColor={headerBgColor}>
       <AppNavigator
-        needsOnboarding={needsOnboarding}
         headerTextColor={headerTextColor}
         headerBgColor={headerBgColor}
       />

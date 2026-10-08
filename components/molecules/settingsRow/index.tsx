@@ -1,6 +1,6 @@
 import { CustomText } from "@/components/atoms/customText";
 import PlayfulSwitch from "@/components/atoms/PlayfulSwitch";
-import { useAppStore } from "@/store";
+
 import { StyleSheet, View } from "react-native";
 
 type RowProps = {
@@ -18,22 +18,25 @@ const SettingRow = ({
   onToggle,
   noBorder,
 }: RowProps) => {
-  const hapticsEnabled = useAppStore((state) => state.hapticsEnabled);
-  const theme = useAppStore((state) => state.theme);
+
+
+  const handleToggle = async () => {
+
+    onToggle();
+  };
+
   return (
     <View style={[styles.row, noBorder && { borderBottomWidth: 0 }]}>
       <View style={styles.textContainer}>
-        <CustomText style={styles.rowTitle}>{title}</CustomText>
-        <CustomText size={10} style={styles.subtitle}>
+        <CustomText style={styles.rowTitle} align="left">{title}</CustomText>
+        <CustomText align="left" size={10} style={styles.subtitle}>
           {subtitle}
         </CustomText>
       </View>
 
-      {/*<Switch value={value} onValueChange={onToggle} />*/}
       <PlayfulSwitch
         value={value}
-        onValueChange={onToggle}
-        enableHaptics={hapticsEnabled}
+        onValueChange={handleToggle}
       />
     </View>
   );

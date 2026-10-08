@@ -12,7 +12,6 @@ import { loadSettingsFromDb } from "@/localDb/settingsService";
 import { useGetUserData } from "@/services/user/hooks";
 import { useGetAllWords } from "@/services/wordle/hooks";
 import { WordsApiResponse } from "@/services/wordle/types";
-import { setOnboarding } from "@/storage/onboardStorage";
 import { deleteUserToken, getUserToken } from "@/storage/userTokenStorage";
 import { useAppStore } from "@/store";
 import { presentBottomSheet } from "@/utils/presentBottomSheet";
@@ -38,12 +37,12 @@ const Main = () => {
   const router = useRouter();
   const { play, stop } = useAudio();
   const { isConnected } = useNetwork();
-  const { showError } = useCustomToast();
+  const { showError, showSuccess, showInfo } = useCustomToast();
   const wordleDataCount = getTotalWordCount();
   const [isToken, setIsToken] = useState(false);
 
   const { data, isFetching } = useGetUserData(isToken);
-  const { data: wordsData } = useGetAllWords(wordleDataCount < 1) as { data: WordsApiResponse | undefined };
+  const { data: wordsData, isFetching: isWordsFetching, isError: isWordsError, refetch: refetchWords } = useGetAllWords(wordleDataCount < 1) as { data: WordsApiResponse | undefined; isFetching: boolean; isError: boolean; refetch: () => void };
   const { shouldUpdate } = useForceUpdate();
 
   // Zustand selectors
@@ -67,6 +66,7 @@ const Main = () => {
   const handleSignOut = useCallback(() => {
     clearAuth();
     deleteUserToken();
+    setIsToken(false);
   }, [clearAuth]);
 
   const handlePresentSettingsModalPress = useCallback(() => {
@@ -78,7 +78,7 @@ const Main = () => {
   // Initial load: onboarding, settings, token check
   useEffect(() => {
     const initialize = async () => {
-      await setOnboarding("true");
+      // Don't set onboarding here - it's already handled in _layout.tsx
       loadSettingsFromDb();
 
       const token = await getUserToken();
@@ -108,12 +108,19 @@ const Main = () => {
     }
   }, [bgEnabled, isHydrated, play, stop]);
 
-  // Save words to SQLite when API returns data
+  // Save words to SQLite when API returns data, show toast on success/failure
   useEffect(() => {
     if (wordsData?.data && wordsData.data.length > 0) {
       saveWordsToDatabase(wordsData.data);
+      showSuccess("Words synced — Infinite mode is ready!");
     }
   }, [wordsData]);
+
+  useEffect(() => {
+    if (isWordsError) {
+      showError("Failed to load words. Tap Infinite to retry.");
+    }
+  }, [isWordsError]);
 
   // Navigate to force update screen if needed
   useEffect(() => {
@@ -151,10 +158,21 @@ const Main = () => {
             />
               <CustomButton
               text="Infinite"
-              onPress={() => handlePlay("infinite")}
+              onPress={() => {
+                if (wordleDataCount < 1) {
+                  refetchWords();
+                  showInfo("Fetching words, please wait…");
+                  return;
+                }
+                handlePlay("infinite");
+              }}
               initialRotation={-10}
               variant="default"
-              isDisable={wordleDataCount < 1}
+              isDisable={isWordsFetching && wordleDataCount < 1}
+              isPending={isWordsFetching && wordleDataCount < 1}
+              isWarn={wordleDataCount < 1 && !isWordsFetching}
+              warningType="warn"
+              message={isWordsError ? "Couldn't load words. Tap to retry." : "Still loading words, please wait…"}
             />
               {/* <CustomButton
               text="TimeAttack"

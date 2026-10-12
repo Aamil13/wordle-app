@@ -70,6 +70,13 @@ export const initDatabase = () => {
       `);
     } catch {}
 
+    try {
+      db.execSync(`
+        ALTER TABLE settings
+        ADD COLUMN showOnboarding INTEGER NOT NULL DEFAULT 1;
+      `);
+    } catch {}
+
     // =========================
     // WORDS MIGRATIONS
     // =========================

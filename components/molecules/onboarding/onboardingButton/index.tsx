@@ -75,17 +75,20 @@ export const OnboardingButton: React.FC<OnboardingButtonProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    alignSelf: "center",
+    alignSelf: "flex-end",
+
+
   },
   button: {
     paddingVertical: 12,
-    paddingHorizontal: 40,
+    paddingHorizontal:10,
     borderRadius: 30,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
+    minWidth:80
   },
   text: {
     fontSize: 18,

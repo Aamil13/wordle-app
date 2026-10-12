@@ -54,10 +54,12 @@ export default function Slide({
       style={[
         {
           width,
-          flex: 1,
+          flexGrow: 1,
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: item.bgColor,
+          gap: 10,
+         
         },
         animatedStyle,
       ]}
@@ -70,35 +72,14 @@ export default function Slide({
         style={{ width: 250, height: 250 }}
       />
 
-      {/* <Text
-        style={{
-          color: item.textColor,
-          fontSize: 28,
-          fontWeight: "bold",
-          marginTop: 20,
-        }}
-      >
-        {item.text}
-      </Text> */}
-      <CustomText size={28} color={item.textColor} style={{ marginTop: 20 }}>
+      <CustomText size={28} color={item.textColor} >
         {item.text}
       </CustomText>
 
-      {/* <Text
-        style={{
-          color: item.descriptionColor,
-          marginTop: 10,
-          fontSize: 16,
-          textAlign: "center",
-          width: "80%",
-        }}
-      >
-        {item.description}
-      </Text> */}
       <CustomText
         size={28}
         color={item.descriptionColor}
-        style={{ marginTop: 10, textAlign: "center", width: "80%" }}
+        style={{ textAlign: "center",   }}
       >
         {item.description}
       </CustomText>

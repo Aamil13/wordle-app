@@ -2,13 +2,11 @@ import { getRootHeaderOptions } from "@/utils/rootHeaderOptions";
 import { Stack, router } from "expo-router";
 
 type Props = {
-  needsOnboarding: boolean;
   headerTextColor: string;
   headerBgColor: string;
 };
 
 export default function AppNavigator({
-  needsOnboarding,
   headerTextColor,
   headerBgColor,
 }: Props) {
@@ -20,9 +18,9 @@ export default function AppNavigator({
         },
       }}
     >
-      {needsOnboarding && (
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      )}
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+
+      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
 
       <Stack.Screen name="main" options={{ headerShown: false }} />
 

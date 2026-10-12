@@ -30,6 +30,10 @@ export type SettingsSlice = {
   theme: "dark" | "light";
   toggleTheme: () => void;
 
+  showOnboarding: boolean;
+  setShowOnboarding: (value: boolean) => void;
+  toggleShowOnboarding: () => void;
+
   isHydrated: boolean;
   setHydrated: (value: boolean) => void;
   hydrateFromDb: (data: Partial<SettingsSlice>) => void;
@@ -49,12 +53,18 @@ export const createSettingsSlice: StateCreator<
   theme: "dark",
   streak: 0,
   bestStreak: 0,
+  showOnboarding: true,
 
   setBgEnabled: (value) => set({ bgEnabled: value }),
   toggleBg: () => set((state) => ({ bgEnabled: !state.bgEnabled })),
 
   toggleTheme: () =>
     set((state) => ({ theme: state.theme === "dark" ? "light" : "dark" })),
+
+  setShowOnboarding: (value) => set({ showOnboarding: value }),
+  toggleShowOnboarding: () =>
+    set((state) => ({ showOnboarding: !state.showOnboarding })),
+
   togglekeyboardSound: () =>
     set((state) => ({ keyboardSoundEnabled: !state.keyboardSoundEnabled })),
 

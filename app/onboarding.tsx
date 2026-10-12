@@ -2,6 +2,8 @@ import { OnboardingButton } from "@/components/molecules/onboarding/onboardingBu
 import { PaginationDots } from "@/components/molecules/onboarding/paginationDots";
 import Slide from "@/components/molecules/onboarding/slide";
 import { GetOnboardingData } from "@/constants/OnboardingData";
+import { saveSettingsToDb } from "@/localDb/settingsService";
+import { useAppStore } from "@/store";
 import { useRouter } from "expo-router";
 import React, { useMemo, useRef, useState } from "react";
 import {
@@ -45,7 +47,9 @@ export default function Onboarding() {
     },
   });
 
-  const finish = () => {
+  const finish = async () => {
+    useAppStore.getState().setShowOnboarding(false);
+    await saveSettingsToDb();
     router.replace("/main");
   };
 
@@ -71,6 +75,8 @@ export default function Onboarding() {
         onMomentumScrollEnd={handleScrollJS}
         scrollEventThrottle={16}
         showsHorizontalScrollIndicator={false}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ alignItems: "stretch" }}
         renderItem={({ item, index: i }) => (
           <Slide item={item} index={i} scrollX={scrollX} />
         )}

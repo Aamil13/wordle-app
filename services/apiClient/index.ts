@@ -58,7 +58,12 @@ api.interceptors.response.use(
 
 function buildUrl(endpoint: string, customBaseUrl: boolean): string {
   const base = customBaseUrl ? CUSTOM_BASE_URL : API_BASE_URL;
-  if (!base?.length) return "";
+  if (!base?.length) {
+    throw new Error(
+      `[apiClient] Base URL is not defined. ` +
+      `Check that EXPO_PUBLIC_${customBaseUrl ? "CUSTOM_BASE_URL" : "API_BASE_URL"} is set in eas.json or your .env file.`
+    );
+  }
   // Avoid double slashes
   return `${base.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
 }

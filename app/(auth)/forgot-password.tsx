@@ -21,7 +21,7 @@ export default function ForgotPasswordScreen() {
   const onSubmit = async (data: any) => {
     mutate(data, {
       onSuccess: (res: { data: string }) => {
-        router.push(`/reset-password?token=${res.data}`);
+        router.push(`/reset-password`);
       },
     });
   };

@@ -1,27 +1,31 @@
-import { View, StyleSheet } from "react-native";
-import { Controller, useForm } from "react-hook-form";
-import { useRouter } from "expo-router";
-import FloatingInput from "@/components/atoms/FloatingInput";
-import { CustomButton } from "@/components/atoms/Button";
-import AuthContainer from "@/components/molecules/auth/authContainer";
-import AuthAnimation from "@/components/molecules/auth/authAnimation";
-import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
-import KeyboardScreenWrapper from "@/components/molecules/KeyboardScreenWrapper";
 import resetPassword from "@/assets/auth/ResetPassword.json";
+import { CustomButton } from "@/components/atoms/Button";
+import FloatingInput from "@/components/atoms/FloatingInput";
+import FormError from "@/components/atoms/FormError/index";
+import AuthAnimation from "@/components/molecules/auth/authAnimation";
+import AuthContainer from "@/components/molecules/auth/authContainer";
+import KeyboardScreenWrapper from "@/components/molecules/KeyboardScreenWrapper";
 import { useResetPassword } from "@/services/auth/hooks";
-import { useLocalSearchParams, useSearchParams } from "expo-router/build/hooks";
+import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
+import { useTheme } from "@/utils/useTheme";
+import { validationRules } from "@/utils/validationRules";
+import { useRouter } from "expo-router";
+import { Controller, useForm } from "react-hook-form";
+import { StyleSheet, View } from "react-native";
+import { OtpInput } from "react-native-otp-entry";
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
-  const token = useLocalSearchParams();
-  const { control, handleSubmit } = useForm();
+  const theme = useTheme();
+  const { control, handleSubmit, formState: { errors } } = useForm({
+    mode: "onChange",
+  });
 
-  const { mutate } = useResetPassword();
+  const { mutate, isPending } = useResetPassword();
 
   const onSubmit = async (data: any) => {
-    if (token?.token.length < 0) return;
     const payload = {
-      token: token?.token,
+      token: data?.token,
       newPassword: data?.password,
       confirmPassword: data?.confirmPassword,
     };
@@ -41,8 +45,29 @@ export default function ResetPasswordScreen() {
 
             <Controller
               control={control}
-              name="password"
+              name="token"
+              rules={{
+                required: "Reset token is required",
+                minLength: {
+                  value: 6,
+                  message: "Token must be 64 characters",
+                },
+              }}
               render={({ field: { onChange, value } }) => (
+                <OtpInput
+                  numberOfDigits={6}
+                  textProps={{ style: { color: theme.text } }}
+                  onFilled={(code) => onChange(code)}
+                />
+              )}
+            />
+            <FormError error={errors.token?.message as string} />
+
+            <Controller
+              control={control}
+              name="password"
+              rules={validationRules.password}
+              render={({ field: { onChange, value }, fieldState: { error } }) => (
                 <>
                   <FloatingInput
                     label="New Password"
@@ -50,6 +75,7 @@ export default function ResetPasswordScreen() {
                     value={value}
                     onChangeText={onChange}
                     isPasswordStrengthMeterShown={true}
+                    error={error?.message}
                   />
                 </>
               )}
@@ -58,12 +84,20 @@ export default function ResetPasswordScreen() {
             <Controller
               control={control}
               name="confirmPassword"
-              render={({ field: { onChange, value } }) => (
+              rules={{
+                required: "Please confirm your password",
+                validate: (value: string) => {
+                  const password = control._formValues.password;
+                  return value === password || "Passwords do not match";
+                },
+              }}
+              render={({ field: { onChange, value }, fieldState: { error } }) => (
                 <FloatingInput
                   label="Confirm Password"
                   secureTextEntry
                   value={value}
                   onChangeText={onChange}
+                  error={error?.message}
                 />
               )}
             />
@@ -74,6 +108,8 @@ export default function ResetPasswordScreen() {
               width="100%"
               size="large"
               variant="primary"
+              isDisable={!!errors.token || !!errors.password || !!errors.confirmPassword || isPending}
+              isPending={isPending}
             />
           </View>
         </AuthContainer>

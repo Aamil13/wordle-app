@@ -75,14 +75,23 @@ const Main = () => {
 
   /* -------------------- Effects -------------------- */
 
-  // Initial load: onboarding, settings, token check
+  // Initial load: settings + sync isToken from already-rehydrated Zustand auth state
   useEffect(() => {
     const initialize = async () => {
       // Don't set onboarding here - it's already handled in _layout.tsx
       loadSettingsFromDb();
 
+      // Auth was already rehydrated in app/index.tsx. Use the Zustand state
+      // as the source of truth, falling back to SecureStore if needed.
+      const alreadyAuthenticated = useAppStore.getState().isAuthenticated;
+      if (alreadyAuthenticated) {
+        setIsToken(true);
+        return;
+      }
+
+      // Fallback: token may exist even if Zustand wasn't hydrated (e.g. deep link)
       const token = await getUserToken();
-      if (token && token.length > 0 ) {
+      if (token && token.length > 0) {
         setIsToken(true);
       }
     };

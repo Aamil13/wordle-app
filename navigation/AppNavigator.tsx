@@ -92,6 +92,16 @@ export default function AppNavigator({
       />
 
       <Stack.Screen
+        name="leaderboard"
+        options={getRootHeaderOptions({
+          router,
+          headerTextColor,
+          backgroundColor: headerBgColor,
+          title: "main",
+        })}
+      />
+
+      <Stack.Screen
         name="force-update"
         options={{ headerShown: false }}
       />

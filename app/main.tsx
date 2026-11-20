@@ -16,11 +16,13 @@ import { deleteUserToken, getUserToken } from "@/storage/userTokenStorage";
 import { useAppStore } from "@/store";
 import { presentBottomSheet } from "@/utils/presentBottomSheet";
 import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
+import { useTheme } from "@/utils/useTheme";
+import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Link, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 // Memoized footer component
 const Footer = memo(() => (
@@ -35,6 +37,7 @@ const Main = () => {
   const aboutBottomSheetRef = useRef<BottomSheetModal>(null);
   const settingsRef = useRef<BottomSheetModal>(null);
   const router = useRouter();
+  const theme = useTheme();
   const { play, stop } = useAudio();
   const { isConnected } = useNetwork();
   const { showError, showSuccess, showInfo } = useCustomToast();
@@ -143,6 +146,13 @@ const Main = () => {
       <SafeAreaWrapper>
         <View style={styles.container}>
           <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.leaderboardIcon}
+              onPress={() => router.push("/leaderboard" as any)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Ionicons name="trophy-outline" size={26} color={theme.text} />
+            </TouchableOpacity>
             <LottieView
               source={require("../assets/onboarding/w.json")}
               style={styles.lottie}
@@ -242,6 +252,13 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     gap: 10,
+    width: "100%",
+    position: "relative",
+  },
+  leaderboardIcon: {
+    position: "absolute",
+    top: 0,
+    right: 16,
   },
   lottie: {
     width: 250,

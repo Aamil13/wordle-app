@@ -1,5 +1,7 @@
+import AnimatedLeaderboardIcon from "@/components/atoms/animatedLeaderboardIcon";
 import { CustomButton } from "@/components/atoms/Button";
 import { CustomText } from "@/components/atoms/customText";
+import MainFooter from "@/components/atoms/mainFooter";
 import AboutBottomSheet from "@/components/organisms/aboutBottomSheet";
 import { AppBottomSheet } from "@/components/organisms/appBottomSheet";
 import SettingsPanel from "@/components/organisms/settingsPanel";
@@ -17,21 +19,12 @@ import { useAppStore } from "@/store";
 import { presentBottomSheet } from "@/utils/presentBottomSheet";
 import SafeAreaWrapper from "@/utils/SafeAreaWrapper";
 import { useTheme } from "@/utils/useTheme";
-import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Link, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
-// Memoized footer component
-const Footer = memo(() => (
-  <View style={styles.footer}>
-    {/*<CustomText size={12}>10 Dec 2025</CustomText>*/}
-    <CustomText size={12}>Made By: Mohd Aamil Shafi</CustomText>
-  </View>
-));
-Footer.displayName = "Footer";
 
 const Main = () => {
   const aboutBottomSheetRef = useRef<BottomSheetModal>(null);
@@ -151,7 +144,7 @@ const Main = () => {
               onPress={() => router.push("/leaderboard" as any)}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Ionicons name="trophy-outline" size={26} color={theme.text} />
+              <AnimatedLeaderboardIcon color={theme.text} />
             </TouchableOpacity>
             <LottieView
               source={require("../assets/onboarding/w.json")}
@@ -228,7 +221,7 @@ const Main = () => {
             />
           </View>
 
-          <Footer />
+          <MainFooter />
         </View>
       </SafeAreaWrapper>
 
@@ -269,9 +262,5 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     gap: 40,
-  },
-  footer: {
-    gap: 10,
-    alignItems: "center",
   },
 });
